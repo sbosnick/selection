@@ -63,3 +63,11 @@ The formal proof that accompanies seL4 is superior to the additional assurances 
 come with Rust's borrow checker, but it may have limits on its scaleability. **selection**
 is an attept to combine the formally proven seL4 microkernel with the addition assurances
 that Rust brings for the parts of the whole system that are not formally proven.
+
+
+# REQ-testing
+partof: REQ-purpose
+###
+**selection** shall expose a means of easily running test under QEUM or on 
+actual hardware. The means of running tests shall be linked into the *cargo*
+test subcommand, if possible.

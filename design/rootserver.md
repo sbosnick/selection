@@ -39,16 +39,3 @@ partof: REQ-rootserver
 [no-std] Rust runtime and a way of exposing the entry point required by a seL4
 rootserver. 'seL4-rt' shall provide the Rust types to expose the seL4 BootInfo
 frame. 'sel4-rt' will not be appropriate for servers other than the rootserver.
-
-
-# REQ-sel4syscrate
-partof:
-- REQ-configure
-- REQ-rootserver
-###
-**selection** shall provide a library crate called 'seL4-sys' that is generated
-from the libsel4 subdirectory of the seL4 source code. This crate shall exclude
-any platform specific parts of libsel4.
-
-'seL4-sys' shall expose the seL4 Kernel\* ABI options (other than KernelPlatform)
-through the use of the configuration the *cargo* makes available to build.rs scripts.

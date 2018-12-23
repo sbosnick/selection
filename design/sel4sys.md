@@ -12,14 +12,14 @@ through the use of the configuration the *cargo* makes available to build.rs scr
 
 
 # SPC-sel4syscrate
-The 'seL4-sys' crate will use the [cmake] crate and a custom CMakeLists.txt file to
+[[.cmake]]\:The 'seL4-sys' crate will use the [cmake] crate and a custom CMakeLists.txt file to
 drive the compilation of libsel4. The custom CMakeLists.txt file is needed because
 the CMakeLists.txt file at the root of the seL4 repository and in the libsel4 subdirectory
 is are fragments that are intended to be embedded in a larger cmake based proejct. The
 template for the custom CMakeLists.txt is the [base.cmake] file from the seL4_tools
 project.
 
-The crate will also use [bindgen] to generate Rust FFI code that calls into libsel4.
+[[.bingen]]\:The crate will also use [bindgen] to generate Rust FFI code that calls into libsel4.
 The uses of [bindgen] will blacklist any platform specific parts of libsel4 and (if
 necessary) the BootInfo frame related parts.
 

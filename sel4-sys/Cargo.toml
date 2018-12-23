@@ -1,3 +1,4 @@
+# This crate implements #SPC-sel4syscrate
 [package]
 name = "sel4-sys"
 version = "0.1.0"

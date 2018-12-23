@@ -18,8 +18,8 @@ running on a seL4 microkernel (and using this project).
 # REQ-sel4platcrate
 partof:
 - REQ-configure
-- REQ-rootserver
 - REQ-microkernel
+- REQ-rootserver
 ###
 **selection** shall provide a collection of library crates, one for each platform 
 supported by both seL4 and Rust. These platform crates shall expose any platform

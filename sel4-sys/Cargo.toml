@@ -3,5 +3,10 @@
 name = "sel4-sys"
 version = "0.1.0"
 authors = ["Steven Bosnick <sbosnick@sympatico.ca>"]
+build = "build.rs"
+links = "sel4"
 
 [dependencies]
+
+[build-dependencies]
+cmake = "0.1.35"

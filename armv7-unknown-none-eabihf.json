@@ -1,0 +1,44 @@
+{
+  "abi-blacklist": [
+    "stdcall",
+    "fastcall",
+    "vectorcall",
+    "thiscall",
+    "win64",
+    "sysv64"
+  ],
+  "arch": "arm",
+  "ar": "arm-linux-gnueabihf-ar",
+  "crt-static-default": true,
+  "crt-static-respected": true,
+  "data-layout": "e-m:e-p:32:32-i64:64-v128:64:128-a:0:32-n32-S64",
+  "dynamic-linking": false,
+  "env": "none",
+  "exe-allocation-crate": "alloc_system",
+  "executables": true,
+  "features": "+v7,+vfp3,+d16,+thumb2,-neon",
+  "has-elf-tls": true,
+  "has-rpath": true,
+  "linker": "arm-linux-gnueabihf-gcc",
+  "linker-flavor": "gcc",
+  "linker-is-gnu": true,
+  "llvm-target": "armv7-unknown-linux-gnueabihf",
+  "max-atomic-width": 64,
+  "no-default-libraries": true,
+  "os": "none",
+  "panic-strategy": "abort",
+  "position-independent-executables": true,
+  "post-link-args": {
+    "gcc": ["-lm", "-lgcc_s", "-lgcc"]
+  },
+  "pre-link-args": {
+    "gcc": ["-ffreestanding", "-nodefaultlibs", "-nostdlib"]
+  },
+  "relro-level": "full",
+  "relocation-model": "static",
+  "target-c-int-width": "32",
+  "target-endian": "little",
+  "target-family": "unix",
+  "target-pointer-width": "32",
+  "vendor": "unknown"
+}

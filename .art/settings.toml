@@ -7,7 +7,10 @@ artifact_paths = ["design"]
 exclude_artifact_paths = []
 
 # Paths containing code that has artifact links
-code_paths = ["sel4-sys/Cargo.toml", "sel4-sys/src/lib.rs"]
+code_paths = [
+    "sel4-sys/Cargo.toml", 
+    "sel4-sys/src/lib.rs",
+    "sel4-sys/build.rs"]
 
 # Paths to exclude when searching through code
 exclude_code_paths = []

@@ -29,6 +29,7 @@ libsel4 as described below.
 - KernelArch: CARGO_CFG_TARGET_ARCH
 - KernelArmSel4Arch: CARGO_CFG_TARGET_ARCH
 - KernelX86Sel4Arch: CARGO_CFG_TARGET_ARCH
+- KernelVerificationBuild: PROFILE
 - KernelDebugBuild: PROFILE
 - KernelPrinting: PROFILE
 - HardwareDebugAPI: PROFILE

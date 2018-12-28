@@ -16,11 +16,13 @@ fn main() {
     let out_dir = env::var("OUT_DIR").unwrap();
 
     // build the native sel4 library
+    // Implements #SPC-sel4syscrate.cmake
     cmake::Config::new(".")
         .generator("Ninja")
         .define("CMAKE_TOOLCHAIN_FILE", "seL4-10.1.1/gcc.cmake")
         .define("LibSel4FunctionAttributes", "public")
         .set_arch(Arch::from_cargo())
+        .set_profile(Profile::from_cargo())
         .build_target("libsel4.a")
         .very_verbose(true)
         .build();
@@ -33,12 +35,29 @@ fn main() {
 
 trait CmakeExt {
     fn set_arch(&mut self, arch: Arch) -> &mut Self;
+    fn set_profile(&mut self, profile: Profile) -> &mut Self;
 }
 
 impl CmakeExt for cmake::Config {
     fn set_arch(&mut self, arch: Arch) -> &mut Self {
         let arch: &str = arch.into();
         self.define(arch, "1")
+    }
+
+    fn set_profile(&mut self, profile: Profile) -> &mut Self {
+        use self::Profile::*;
+
+        match profile {
+            Release => {
+                self.define("KernelVerificationBuild", "ON")
+            }
+            Debug => {
+                self.define("KernelVerificationBuild", "OFF")
+                    .define("KernelDebugBuild", "ON")
+                    .define("KernelPrinting", "ON")
+                    .define("HardwareDebugAPI", "ON")
+            }
+        }
     }
 }
 
@@ -78,5 +97,27 @@ impl From<Arch> for &'static str {
             Aarch32 => "AARCH32",
             Aarch64 => "AARCH64",
         }
+    }
+}
+
+enum Profile {
+    Release,
+    Debug,
+}
+
+impl Profile {
+    fn new(profile: impl AsRef<str>) -> Result<Profile, String> {
+        use self::Profile::*;
+
+        match profile.as_ref() {
+            "release" => Ok(Release),
+            "debug" => Ok(Debug),
+            profile => Err(format!("Unrecognized profile: {}", profile)),
+        }
+    }
+
+    fn from_cargo() -> Profile {
+        Profile::new(env::var("PROFILE").expect("PROFILE not set."))
+            .expect("PROFILE not set to recognized profile.")
     }
 }

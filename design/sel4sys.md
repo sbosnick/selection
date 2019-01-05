@@ -20,8 +20,7 @@ template for the custom CMakeLists.txt is the [base.cmake] file from the seL4_to
 project.
 
 [[.bingen]]\:The crate will also use [bindgen] to generate Rust FFI code that calls into libsel4.
-The uses of [bindgen] will blacklist any platform specific parts of libsel4 and (if
-necessary) the BootInfo frame related parts.
+The uses of [bindgen] will blacklist any platform specific parts of libsel4.
 
 The build.rs script for this crate will set cmake configuration options for building
 libsel4 as described below.

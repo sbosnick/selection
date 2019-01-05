@@ -1,12 +1,14 @@
 # This crate implements #SPC-sel4syscrate
 [package]
-name = "sel4-sys"
-version = "0.1.0"
 authors = ["Steven Bosnick <sbosnick@sympatico.ca>"]
 build = "build.rs"
 links = "sel4"
-
-[dependencies]
+name = "sel4-sys"
+version = "0.1.0"
 
 [build-dependencies]
+bindgen = "0.45.0"
 cmake = "0.1.35"
+
+[dependencies]
+cty = "0.1.5"

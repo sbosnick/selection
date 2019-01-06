@@ -47,7 +47,7 @@ All other cmake configuration options will use their default values.
 The 'sel4-sys' crate shall have at least the following tests:
 
 - [[.compile]]: a smoke test that a simple call from Rust code compiles
-- [[.run]]: a smoke test that a simple call from Rust code runs in QEUM
+- [[.run]]: a smoke test that a simple call from Rust code runs in QEMU
 - [[.platform]]: a test that compiling libsel4 for different platforms is binary
         identical
 

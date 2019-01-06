@@ -7,10 +7,15 @@
 // except according to those terms
 
 extern crate cmake;
-extern crate tempfile;
 extern crate file_diff;
+extern crate tempfile;
 
-use std::{path::Path, ffi::{OsStr, OsString}, fs::File, process::Command};
+use std::{
+    ffi::{OsStr, OsString},
+    fs::File,
+    path::Path,
+    process::Command,
+};
 
 #[test]
 // Imlements #TST-sel4syscrate.platform
@@ -30,9 +35,12 @@ fn libsel4_platform_independance() {
     cmake_build(manifest_dir, sabre_dir.as_ref(), "sabre");
     cmake_build(manifest_dir, omap3_dir.as_ref(), "omap3");
 
-    let sabre_lib = sabre_dir.as_ref() .join("libsel4/libsel4.a");
+    let sabre_lib = sabre_dir.as_ref().join("libsel4/libsel4.a");
     let omap3_lib = omap3_dir.as_ref().join("libsel4/libsel4.a");
-    assert!(diff_path(sabre_lib, omap3_lib), "libsel4.a different for sabre and omap3 platforms");
+    assert!(
+        diff_path(sabre_lib, omap3_lib),
+        "libsel4.a different for sabre and omap3 platforms"
+    );
 }
 
 fn cmake_build(src: &Path, build: &Path, platform: &str) {
@@ -51,10 +59,12 @@ fn cmake_build(src: &Path, build: &Path, platform: &str) {
         .output()
         .expect("Unable to run cmake to generate project");
 
-    assert!(output.status.success(), 
-            "cmake generation not sucessful\n\nstdout\n======\n{}\n\nstderr\n======\n{}",
-            String::from_utf8_lossy(&output.stdout),
-            String::from_utf8_lossy(&output.stderr));
+    assert!(
+        output.status.success(),
+        "cmake generation not sucessful\n\nstdout\n======\n{}\n\nstderr\n======\n{}",
+        String::from_utf8_lossy(&output.stdout),
+        String::from_utf8_lossy(&output.stderr)
+    );
 
     let output = Command::new("cmake")
         .current_dir(build)
@@ -64,10 +74,12 @@ fn cmake_build(src: &Path, build: &Path, platform: &str) {
         .output()
         .expect("Unable to run cmake to build project");
 
-    assert!(output.status.success(), 
-            "cmake generation not sucessful\n\nstdout\n======\n{}\n\nstderr\n======\n{}",
-            String::from_utf8_lossy(&output.stdout),
-            String::from_utf8_lossy(&output.stderr));
+    assert!(
+        output.status.success(),
+        "cmake generation not sucessful\n\nstdout\n======\n{}\n\nstderr\n======\n{}",
+        String::from_utf8_lossy(&output.stdout),
+        String::from_utf8_lossy(&output.stderr)
+    );
 }
 
 fn diff_path(f1: impl AsRef<Path>, f2: impl AsRef<Path>) -> bool {

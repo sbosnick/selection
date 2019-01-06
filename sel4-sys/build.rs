@@ -9,8 +9,8 @@
 extern crate bindgen;
 extern crate cmake;
 
-use std::{env, fs};
 use std::path::{Path, PathBuf};
+use std::{env, fs};
 
 fn main() {
     // get the base directories and the architecture
@@ -87,15 +87,12 @@ impl CmakeExt for cmake::Config {
         use self::Profile::*;
 
         match profile {
-            Release => {
-                self.define("KernelVerificationBuild", "ON")
-            }
-            Debug => {
-                self.define("KernelVerificationBuild", "OFF")
-                    .define("KernelDebugBuild", "ON")
-                    .define("KernelPrinting", "ON")
-                    .define("HardwareDebugAPI", "ON")
-            }
+            Release => self.define("KernelVerificationBuild", "ON"),
+            Debug => self
+                .define("KernelVerificationBuild", "OFF")
+                .define("KernelDebugBuild", "ON")
+                .define("KernelPrinting", "ON")
+                .define("HardwareDebugAPI", "ON"),
         }
     }
 }
@@ -130,7 +127,7 @@ impl Arch {
         use self::Arch::*;
 
         // common directories
-        let mut dirs = vec! [
+        let mut dirs = vec![
             src.join("include"),
             build.join("include"),
             build.join("autoconf"),
@@ -147,7 +144,6 @@ impl Arch {
                 dirs.push(src.join("arch_include/arm"));
                 dirs.push(build.join("arch_include/arm"));
             }
-
         }
 
         // sel4_arch_include directories
@@ -191,7 +187,7 @@ impl Arch {
 }
 
 impl From<Arch> for &'static str {
-    fn from(arch : Arch) -> Self {
+    fn from(arch: Arch) -> Self {
         use self::Arch::*;
 
         match arch {

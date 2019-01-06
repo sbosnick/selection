@@ -49,7 +49,7 @@ The 'sel4-sys' crate shall have at least the following tests:
 - [[.compile]]: a smoke test that a simple call from Rust code compiles
 - [[.run]]: a smoke test that a simple call from Rust code runs in QEUM
 - [[.platform]]: a test that compiling libsel4 for different platforms is binary
-        idendical
+        identical
 
 The last test verifies an implicit assumption of dividing out the platform specific
 parts of libsel4 from the rest of that library.

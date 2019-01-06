@@ -1,4 +1,4 @@
-# This crate implements #SPC-sel4syscrate
+# This crate implements #SPC-sel4syscrate and #TST-sel4syscrate
 [package]
 authors = ["Steven Bosnick <sbosnick@sympatico.ca>"]
 build = "build.rs"
@@ -12,3 +12,8 @@ cmake = "0.1.35"
 
 [dependencies]
 cty = "0.1.5"
+
+[dev-dependencies]
+tempfile = "3.0.5"
+cmake = "0.1.35"
+file_diff = "1.0.0"

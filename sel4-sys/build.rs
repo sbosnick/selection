@@ -70,6 +70,10 @@ fn main() {
         .unwrap()
         .write_to_file(out_dir.join("bindings.rs"))
         .unwrap();
+
+    // outuput the cargo metadata to link with libsel4.a
+    println!("cargo:rustc-link-lib=static=sel4");
+    println!("cargo:rustc-link-search=native={}", out_dir.display());
 }
 
 trait CmakeExt {

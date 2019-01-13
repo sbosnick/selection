@@ -10,7 +10,7 @@ cmake_minimum_required(VERSION 3.7.2)
 project(rustsel4build C ASM)
 
 # The releative path to the released seL4 source.
-set(KERNEL_PATH seL4-10.1.1)
+set(KERNEL_PATH seL4)
 
 # Set the architecture and sub-architecture using
 # the same variables that ${KERNEL_PATH}/gcc.cmake uses.

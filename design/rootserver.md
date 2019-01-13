@@ -15,23 +15,6 @@ library will be the main connection from a server (including the rootserver)
 running on a seL4 microkernel (and using this project).
 
 
-# REQ-sel4platcrate
-partof:
-- REQ-configure
-- REQ-microkernel
-- REQ-rootserver
-###
-**selection** shall provide a collection of library crates, one for each platform 
-supported by both seL4 and Rust. These platform crates shall expose any platform
-specific parts of libsel4 for a given platform.
-
-The platform crates shall also compile the seL4 microkernel binary itself as a side
-effect of being built.
-
-The platform crates shall expose *cargo* features for "profiles" of seL4 Kernel\*
-non-ABI options.
-
-
 # REQ-sel4rtcrate
 partof: REQ-rootserver
 ###

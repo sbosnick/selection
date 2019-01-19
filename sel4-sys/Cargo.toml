@@ -5,10 +5,10 @@ build = "build.rs"
 links = "sel4"
 name = "sel4-sys"
 version = "0.1.0"
+edition = "2018"
 
 [build-dependencies]
-bindgen = "0.45.0"
-cmake = "0.1.35"
+sel4-build = { path = "../sel4-build" }
 
 [dependencies]
 cty = "0.1.5"
@@ -17,3 +17,4 @@ cty = "0.1.5"
 tempfile = "3.0.5"
 cmake = "0.1.35"
 file_diff = "1.0.0"
+sel4-build = { path = "../sel4-build" }

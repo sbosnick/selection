@@ -1,7 +1,12 @@
 [package]
+authors = ["Steven Bosnick <sbosnick@sympatico.ca>"]
+description = "sel4-build is a build.rs helper for sel4-sys and the sel4-plat-* crates"
+edition = "2018"
 name = "sel4-build"
 version = "0.1.0"
-authors = ["Steven Bosnick <sbosnick@sympatico.ca>"]
-edition = "2018"
 
 [dependencies]
+askama = "0.7.2"
+bindgen = "0.45.0"
+cmake = "0.1.35"
+failure = "0.1.5"

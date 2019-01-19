@@ -12,10 +12,12 @@ extern crate tempfile;
 
 use std::{
     ffi::{OsStr, OsString},
-    fs::File,
+    fs::{self, File},
     path::Path,
     process::Command,
 };
+
+use sel4_build;
 
 #[test]
 // Imlements #TST-sel4syscrate.platform
@@ -31,20 +33,29 @@ fn libsel4_platform_independance() {
     let manifest_dir = Path::new(env!("CARGO_MANIFEST_DIR"));
     let sabre_dir = tempfile::tempdir().unwrap();
     let omap3_dir = tempfile::tempdir().unwrap();
+    let sabre_build = sabre_dir.as_ref().join("build");
+    let omap3_build = omap3_dir.as_ref().join("build");
+    fs::create_dir(&sabre_build).expect("Unable to create build dir.");
+    fs::create_dir(&omap3_build).expect("Unable to create build dir.");
+    sel4_build::copy_cmake_files(sabre_dir.as_ref(), manifest_dir)
+        .expect("Unable to copy cmake files.");
+    sel4_build::copy_cmake_files(omap3_dir.as_ref(), manifest_dir)
+        .expect("Unable to copy cmake files.");
 
-    cmake_build(manifest_dir, sabre_dir.as_ref(), "sabre");
-    cmake_build(manifest_dir, omap3_dir.as_ref(), "omap3");
 
-    let sabre_lib = sabre_dir.as_ref().join("libsel4/libsel4.a");
-    let omap3_lib = omap3_dir.as_ref().join("libsel4/libsel4.a");
+    cmake_build(sabre_dir.as_ref(), sabre_build.as_ref(), manifest_dir, "sabre");
+    cmake_build(omap3_dir.as_ref(), omap3_build.as_ref(), manifest_dir, "omap3");
+
+    let sabre_lib = sabre_dir.as_ref().join("build/libsel4/libsel4.a");
+    let omap3_lib = omap3_dir.as_ref().join("build/libsel4/libsel4.a");
     assert!(
         diff_path(sabre_lib, omap3_lib),
         "libsel4.a different for sabre and omap3 platforms"
     );
 }
 
-fn cmake_build(src: &Path, build: &Path, platform: &str) {
-    let toolchain_file = src.join("seL4-10.1.1/gcc.cmake");
+fn cmake_build(src: &Path, build: &Path, manifest: &Path, platform: &str,) {
+    let toolchain_file = manifest.join("seL4/gcc.cmake");
 
     let output = Command::new("cmake")
         .current_dir(build)

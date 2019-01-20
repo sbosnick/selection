@@ -6,7 +6,8 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms
 
-extern crate cmake;
+#![cfg(not(target_os = "none"))]
+
 extern crate file_diff;
 extern crate tempfile;
 

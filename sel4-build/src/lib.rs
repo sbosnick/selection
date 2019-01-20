@@ -31,12 +31,23 @@ pub enum CMakeTarget {
     Library,
 
     /// Build "kernel.elf".
-    Kernel,
+    Kernel(Platform),
+}
+
+/// The seL4 platform to build.
+#[derive(Clone, Copy)]
+pub enum Platform {
+    /// The ia32 and x86_64 PC 99 platform.
+    Pc99,
 }
 
 impl CMakeTarget {
     /// Invoke CMake to generate and build the CMakeTarget
     pub fn build(&self) {
+        // check if we sould build anything
+        let arch = Arch::from_cargo();
+        if !self.should_build(arch) { return; }
+
         // get the build directies
         let dirs = BuildDirs::from_cargo();
 
@@ -49,7 +60,7 @@ impl CMakeTarget {
             .generator("Ninja")
             .define("CMAKE_TOOLCHAIN_FILE", dirs.toolchain_file())
             .define("LibSel4FunctionAttributes", "public")
-            .set_arch(Arch::from_cargo())
+            .set_arch_and_platform(arch, self)
             .set_profile(Profile::from_cargo())
             .set_cmake_target(self)
             .very_verbose(true)
@@ -62,13 +73,26 @@ impl CMakeTarget {
 
     /// Generate the bindings for the appropriate type of build target.
     pub fn bindgen(&self) {
+        use self::CMakeTarget::{Library, Kernel};
+
+        // check if we sould build anything
+        let arch = Arch::from_cargo();
+        if !self.should_build(arch) { return; }
+        
         // get the build directies
         let dirs = BuildDirs::from_cargo();
 
         // generate the bindings
         match self {
-            CMakeTarget::Kernel => unimplemented!(),
-            CMakeTarget::Library => bindgen::builder().header(dirs.sel4_header())
+            Kernel(platform) => bindgen::builder().header(dirs.plat_header(*platform))
+                .use_core()
+                .ctypes_prefix("cty")
+                .generate_comments(false)
+                .generate()
+                .unwrap()
+                .write_to_file(dirs.bindings_file())
+                .unwrap(),
+            Library => bindgen::builder().header(dirs.sel4_header())
                 .use_core()
                 .ctypes_prefix("cty")
                 .generate_comments(false)
@@ -87,8 +111,7 @@ impl CMakeTarget {
                 .blacklist_item("seL4_NumExclusiveWatchpoints")
                 .blacklist_item("seL4_NumHWBreakpoints")
                 .clang_args(
-                    Arch::from_cargo()
-                        .include_dirs(&dirs.libsel4_src(), &dirs.libsel4_build())
+                    arch.include_dirs(&dirs.libsel4_src(), &dirs.libsel4_build())
                         .iter()
                         .map(|path| format!("-I{}", path.display()))
                 )
@@ -99,16 +122,45 @@ impl CMakeTarget {
                 .unwrap(),
         }
     }
+
+    fn should_build(&self, arch: Arch) -> bool {
+        use self::CMakeTarget::{Library, Kernel};
+        use self::Platform::Pc99;
+        use self::Arch::{Ia32, X86_64};
+
+        match self {
+            Library => true,
+            Kernel(Pc99) => arch == Ia32 || arch == X86_64,
+        }
+    }
+}
+
+impl Platform {
+    fn plat_include_dir_name(&self) -> &'static str {
+        use self::Platform::*;
+
+        match self {
+            Pc99 => "pc99",
+        }
+    }
 }
 
 trait CmakeExt {
-    fn set_arch(&mut self, arch: Arch) -> &mut Self;
+    fn set_arch_and_platform(&mut self, arch: Arch, target: &CMakeTarget) -> &mut Self;
     fn set_profile(&mut self, profile: Profile) -> &mut Self;
     fn set_cmake_target(&mut self, target: &CMakeTarget) -> &mut Self;
 }
 
 impl CmakeExt for cmake::Config {
-    fn set_arch(&mut self, arch: Arch) -> &mut Self {
+    fn set_arch_and_platform(&mut self, arch: Arch, target: &CMakeTarget) -> &mut Self {
+        use self::CMakeTarget::Kernel;
+
+        if let Kernel(platform) = target {
+            match platform {
+                Platform::Pc99 => {}
+            }
+        }
+
         let arch: &str = arch.into();
         self.define(arch, "1")
     }
@@ -131,12 +183,12 @@ impl CmakeExt for cmake::Config {
 
         match target {
             Library => self.build_target("libsel4.a"),
-            Kernel => self.build_target("kernel.elf"),
+            Kernel(_) => self.build_target("kernel.elf"),
         }
     }
 }
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, PartialEq)]
 enum Arch {
     Ia32,
     X86_64,
@@ -289,7 +341,7 @@ impl BuildDirs {
 
         match target {
             Library => self.out_dir.join("build/libsel4/libsel4.a"),
-            Kernel => self.out_dir.join("build/kernel/kernel.elf"),
+            Kernel(_) => self.out_dir.join("build/kernel/kernel.elf"),
         }
     }
 
@@ -298,7 +350,7 @@ impl BuildDirs {
 
         match target {
             Library => self.out_dir.join("libsel4.a"),
-            Kernel => self.out_dir.join("kernel.elf"),
+            Kernel(_) => self.out_dir.join("kernel.elf"),
         }
     }
 
@@ -307,6 +359,15 @@ impl BuildDirs {
             .into_os_string()
             .into_string()
             .expect("Path to sel4.h contained non-UTF8 characters")
+    }
+
+    fn plat_header(&self, platform: Platform) -> String {
+        let mut plat_dir = self.manifest_dir.join("seL4/libsel4/sel4_plat_include");
+        plat_dir.push(platform.plat_include_dir_name());
+        plat_dir.push("sel4/plat/api/constants.h");
+
+        plat_dir.into_os_string().into_string()
+            .expect("Path to sel4 platform specifc constants containted non-UTF8 characers")
     }
 
     fn libsel4_src(&self) -> PathBuf {

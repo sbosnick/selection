@@ -1,9 +1,9 @@
 [package]
 authors = ["Steven Bosnick <sbosnick@sympatico.ca>"]
+build = "build.rs"
 edition = "2018"
 name = "sel4-plat-pc99"
 version = "0.1.0"
-build = "build.rs"
 
 [build-dependencies]
 
@@ -12,3 +12,4 @@ optional = false
 path = "../sel4-build"
 
 [dependencies]
+cty = "0.1.5"

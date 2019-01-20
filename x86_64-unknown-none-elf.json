@@ -1,0 +1,27 @@
+{
+  "arch": "x86_64",
+  "cpu": "westmere",
+  "data-layout": "e-m:e-i64:64-f80:128-n8:16:32:64-S128",
+  "dynamic-linking": false,
+  "env": "elf",
+  "executables": true,
+  "has-elf-tls": true,
+  "has-rpath": true,
+  "linker": "rust-lld",
+  "linker-flavor": "ld.lld",
+  "llvm-target": "x86_64-elf",
+  "max-atomic-width": 64,
+  "no-compiler-rt": false,
+  "no-default-libraries": true,
+  "os": "none",
+  "panic-strategy": "abort",
+  "position-independent-executables": false,
+  "pre-link-args": {
+    "gcc": ["-m64", "-ffreestanding", "-nodefaultlibs", "-nostdlib"]
+  },
+  "relocation-model": "static",
+  "target-c-int-width": "32",
+  "target-endian": "little",
+  "target-pointer-width": "64",
+  "vendor": "unknown"
+}

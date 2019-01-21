@@ -27,6 +27,7 @@ pub enum CMakeTarget {
 pub enum Platform {
     /// The ia32 and x86_64 PC 99 platform.
     Pc99,
+    Sabre,
 }
 
 impl CMakeTarget {
@@ -113,12 +114,13 @@ impl CMakeTarget {
 
     fn should_build(&self, arch: Arch) -> bool {
         use self::CMakeTarget::{Library, Kernel};
-        use self::Platform::Pc99;
-        use self::Arch::{Ia32, X86_64};
+        use self::Platform::{Pc99, Sabre};
+        use self::Arch::{Ia32, X86_64, Aarch32};
 
         match self {
             Library => true,
             Kernel(Pc99) => arch == Ia32 || arch == X86_64,
+            Kernel(Sabre) => arch == Aarch32,
         }
     }
 }
@@ -129,6 +131,7 @@ impl Platform {
 
         match self {
             Pc99 => "pc99",
+            Sabre => "imx6",
         }
     }
 }
@@ -146,6 +149,7 @@ impl CmakeExt for cmake::Config {
         if let Kernel(platform) = target {
             match platform {
                 Platform::Pc99 => {}
+                Platform::Sabre => {self.define("KernelARMPlatform", "sabre");}
             }
         }
 

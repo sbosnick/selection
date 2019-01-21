@@ -15,6 +15,7 @@ code_paths = [
     "sel4-sys/examples/smoketest.rs",
     "sel4-build/src/lib.rs",
     "sel4-plat-pc99/src/lib.rs",
+    "sel4-plat-sabre/src/lib.rs",
 ]
 
 # Paths to exclude when searching through code

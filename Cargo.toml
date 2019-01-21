@@ -1,2 +1,7 @@
 [workspace]
-members = ["sel4-sys", "sel4-build", "sel4-plat-pc99"]
+members = [
+    "sel4-sys", 
+    "sel4-build", 
+    "sel4-plat-pc99",
+    "sel4-plat-sabre",
+]

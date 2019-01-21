@@ -4,3 +4,6 @@
 [submodule "sel4-plat-pc99/seL4"]
 	path = sel4-plat-pc99/seL4
 	url = https://github.com/seL4/seL4.git
+[submodule "sel4-plat-sabre/seL4"]
+	path = sel4-plat-sabre/seL4
+	url = https://github.com/seL4/seL4.git

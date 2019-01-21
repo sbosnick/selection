@@ -5,7 +5,7 @@ edition = "2018"
 name = "sel4-build"
 version = "0.1.0"
 
-[dependencies]
+[target.'cfg(not(target_os = "none"))'.dependencies]
 askama = "0.7.2"
 bindgen = "0.45.0"
 cmake = "0.1.35"

@@ -18,6 +18,13 @@
 //! file. In particular, they may panic if the usual CARGO_* environment variables
 //! are not set.
 
+#![cfg_attr(target_os = "none", no_std)]
+
+#[cfg(not(target_os = "none"))]
+pub use inner::{CMakeTarget, Platform, copy_cmake_files, get_cargo_var};
+
+#[cfg(not(target_os = "none"))]
+mod inner {
 use std::{env, fs, path::{Path, PathBuf}};
 
 use askama::Template;
@@ -423,4 +430,5 @@ impl<'a> CMakeListsTemplate<'a> {
                 .expect("manifest_dir contains non-UTF8 characters"),
         }
     }
+}
 }

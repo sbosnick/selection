@@ -26,7 +26,6 @@ There shall be the following platform crates:
 
 - [[.pc99]]\: ia32 and x86_64
 - [[.sabre]]\: aarch32
-- [[.kzm]]\: aarch32
 - [[.omap3]]\: aarch32
 - [[.am335x]]\: aarch32
 - [[.exynos4]]\: aarch32
@@ -60,9 +59,14 @@ the values from the .cmake files in the configs subdirectory of the seL4 project
 root for the non-default values of non-ABI Kernel\* options. The Verified profile 
 shall be exposed in each platform crate with a "verified-profile" feature.
 
+**selection** will not support the kzm platform for two reasons. First, it is the
+only ARMv6A platform supported by seL4 and would require its own target specification
+file for the rust compiler. Second the [sel4-kzm] supported hardware page indicates
+that "The KZM is depreciated...".
+
 [cmake]: https://crates.io/crates/cmake
 [bindgen]: https://crates.io/crates/bindgen
-
+[sel4-kzm]: https://docs.sel4.systems/Hardware/Kzm.html
 
 # TST-sel4platcrate
 The sel4-plat-pc99 crate shall have a smoke test that checks for a kernel.elf 

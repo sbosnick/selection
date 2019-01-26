@@ -4,4 +4,5 @@ members = [
     "sel4-build", 
     "sel4-plat-pc99",
     "sel4-plat-sabre",
+    "sel4-plat-omap3",
 ]

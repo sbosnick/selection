@@ -12,7 +12,7 @@
 //! platform.
 //!
 //! This crate will be empty if the target architecture isn't arm
-//! A side effect of building this project (on the arm architecture) 
+//! A side effect of building this project (on the arm architecture)
 //! is that the seL4 microkernal for the Omap3 platform will be built.
 //!
 //! Currently this crate will also be empty for a debug profile. This is tied

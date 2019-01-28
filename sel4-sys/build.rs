@@ -21,6 +21,8 @@ fn main() {
 
     // outuput the cargo metadata to link with libsel4.a
     println!("cargo:rustc-link-lib=static=sel4");
-    println!("cargo:rustc-link-search=native={}", sel4_build::get_cargo_var("OUT_DIR"));
+    println!(
+        "cargo:rustc-link-search=native={}",
+        sel4_build::get_cargo_var("OUT_DIR")
+    );
 }
-

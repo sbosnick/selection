@@ -17,4 +17,3 @@ fn main() {
     // generate the rust bindings to the platform specifc parts of the sel4 library
     target.bindgen();
 }
-

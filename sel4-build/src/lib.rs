@@ -8,7 +8,7 @@
 
 // Implements #SPC-sel4platcrate.buildcrate
 
-//! The sel4-build crate provides build.rs support for the sel4-sys crate and 
+//! The sel4-build crate provides build.rs support for the sel4-sys crate and
 //! the sel4-plat-* crates.
 //!
 //! This crate is really an implementation detail of those crates and there is
@@ -21,7 +21,7 @@
 #![cfg_attr(target_os = "none", no_std)]
 
 #[cfg(not(target_os = "none"))]
-pub use hosted::{CMakeTarget, Platform, copy_cmake_files, get_cargo_var};
+pub use hosted::{copy_cmake_files, get_cargo_var, CMakeTarget, Platform};
 
 #[cfg(not(target_os = "none"))]
 mod hosted;

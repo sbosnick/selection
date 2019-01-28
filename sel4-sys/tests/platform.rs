@@ -43,9 +43,18 @@ fn libsel4_platform_independance() {
     sel4_build::copy_cmake_files(omap3_dir.as_ref(), manifest_dir)
         .expect("Unable to copy cmake files.");
 
-
-    cmake_build(sabre_dir.as_ref(), sabre_build.as_ref(), manifest_dir, "sabre");
-    cmake_build(omap3_dir.as_ref(), omap3_build.as_ref(), manifest_dir, "omap3");
+    cmake_build(
+        sabre_dir.as_ref(),
+        sabre_build.as_ref(),
+        manifest_dir,
+        "sabre",
+    );
+    cmake_build(
+        omap3_dir.as_ref(),
+        omap3_build.as_ref(),
+        manifest_dir,
+        "omap3",
+    );
 
     let sabre_lib = sabre_dir.as_ref().join("build/libsel4/libsel4.a");
     let omap3_lib = omap3_dir.as_ref().join("build/libsel4/libsel4.a");
@@ -55,7 +64,7 @@ fn libsel4_platform_independance() {
     );
 }
 
-fn cmake_build(src: &Path, build: &Path, manifest: &Path, platform: &str,) {
+fn cmake_build(src: &Path, build: &Path, manifest: &Path, platform: &str) {
     let toolchain_file = manifest.join("seL4/gcc.cmake");
 
     let output = Command::new("cmake")

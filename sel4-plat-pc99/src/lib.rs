@@ -15,7 +15,7 @@
 //! platform.
 //!
 //! This crate will be empty if the target architecture is neither x86 nor x86_64.
-//! A side effect of building this project (on the x86 or x86_64 architectures) 
+//! A side effect of building this project (on the x86 or x86_64 architectures)
 //! is that the seL4 microkernal for the PC 99 platform will be built.
 
 #![no_std]

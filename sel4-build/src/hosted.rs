@@ -6,7 +6,10 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms
 
-use std::{env, fs, path::{Path, PathBuf}};
+use std::{
+    env, fs,
+    path::{Path, PathBuf},
+};
 
 use askama::Template;
 use bindgen;
@@ -37,7 +40,9 @@ impl CMakeTarget {
         // check if we sould build anything
         let arch = Arch::from_cargo();
         let profile = Profile::from_cargo();
-        if !self.should_build(arch, profile) { return; }
+        if !self.should_build(arch, profile) {
+            return;
+        }
 
         // get the build directies
         let dirs = BuildDirs::from_cargo();
@@ -64,19 +69,22 @@ impl CMakeTarget {
 
     /// Generate the bindings for the appropriate type of build target.
     pub fn bindgen(&self) {
-        use self::CMakeTarget::{Library, Kernel};
+        use self::CMakeTarget::{Kernel, Library};
 
         // check if we sould build anything
         let arch = Arch::from_cargo();
         let profile = Profile::from_cargo();
-        if !self.should_build(arch, profile) { return; }
-        
+        if !self.should_build(arch, profile) {
+            return;
+        }
+
         // get the build directies
         let dirs = BuildDirs::from_cargo();
 
         // generate the bindings
         match self {
-            Kernel(platform) => bindgen::builder().header(dirs.plat_header(*platform))
+            Kernel(platform) => bindgen::builder()
+                .header(dirs.plat_header(*platform))
                 .use_core()
                 .ctypes_prefix("cty")
                 .generate_comments(false)
@@ -84,7 +92,8 @@ impl CMakeTarget {
                 .unwrap()
                 .write_to_file(dirs.bindings_file())
                 .unwrap(),
-            Library => bindgen::builder().header(dirs.sel4_header())
+            Library => bindgen::builder()
+                .header(dirs.sel4_header())
                 .use_core()
                 .ctypes_prefix("cty")
                 .generate_comments(false)
@@ -105,7 +114,7 @@ impl CMakeTarget {
                 .clang_args(
                     arch.include_dirs(&dirs.libsel4_src(), &dirs.libsel4_build())
                         .iter()
-                        .map(|path| format!("-I{}", path.display()))
+                        .map(|path| format!("-I{}", path.display())),
                 )
                 .clang_arg(format!("-I{}", dirs.kernel_gen_config().display()))
                 .generate()
@@ -116,9 +125,9 @@ impl CMakeTarget {
     }
 
     fn should_build(&self, arch: Arch, profile: Profile) -> bool {
-        use self::CMakeTarget::{Library, Kernel};
-        use self::Platform::{Pc99, Sabre, Omap3};
-        use self::Arch::{Ia32, X86_64, Aarch32};
+        use self::Arch::{Aarch32, Ia32, X86_64};
+        use self::CMakeTarget::{Kernel, Library};
+        use self::Platform::{Omap3, Pc99, Sabre};
         use self::Profile::Release;
 
         match self {
@@ -155,8 +164,12 @@ impl CmakeExt for cmake::Config {
         if let Kernel(platform) = target {
             match platform {
                 Platform::Pc99 => {}
-                Platform::Sabre => {self.define("KernelARMPlatform", "sabre");}
-                Platform::Omap3=> {self.define("KernelARMPlatform", "omap3");}
+                Platform::Sabre => {
+                    self.define("KernelARMPlatform", "sabre");
+                }
+                Platform::Omap3 => {
+                    self.define("KernelARMPlatform", "omap3");
+                }
             }
         }
 
@@ -355,7 +368,8 @@ impl BuildDirs {
     }
 
     fn sel4_header(&self) -> String {
-        self.manifest_dir.join("seL4/libsel4/include/sel4/sel4.h")
+        self.manifest_dir
+            .join("seL4/libsel4/include/sel4/sel4.h")
             .into_os_string()
             .into_string()
             .expect("Path to sel4.h contained non-UTF8 characters")
@@ -366,7 +380,9 @@ impl BuildDirs {
         plat_dir.push(platform.plat_include_dir_name());
         plat_dir.push("sel4/plat/api/constants.h");
 
-        plat_dir.into_os_string().into_string()
+        plat_dir
+            .into_os_string()
+            .into_string()
             .expect("Path to sel4 platform specifc constants containted non-UTF8 characers")
     }
 
@@ -396,7 +412,7 @@ pub fn get_cargo_var(var: &str) -> String {
 ///
 /// This function can be called from outside of a build.rs context (it does
 /// not depend on the cargo environment variables being set).
-pub fn copy_cmake_files<P,Q>(out_dir: P, manifest_dir: Q) -> Fallible<()> 
+pub fn copy_cmake_files<P, Q>(out_dir: P, manifest_dir: Q) -> Fallible<()>
 where
     P: AsRef<Path>,
     Q: AsRef<Path>,
@@ -404,7 +420,10 @@ where
     let rootfile = out_dir.as_ref().join("CMakeLists.txt");
     let flagsfile = out_dir.as_ref().join("flags.cmake");
 
-    fs::write(rootfile, CMakeListsTemplate::new(manifest_dir.as_ref()).render()?)?;
+    fs::write(
+        rootfile,
+        CMakeListsTemplate::new(manifest_dir.as_ref()).render()?,
+    )?;
     fs::write(flagsfile, include_str!("flags.cmake"))?;
 
     Ok(())
@@ -419,7 +438,8 @@ struct CMakeListsTemplate<'a> {
 impl<'a> CMakeListsTemplate<'a> {
     fn new(manifest_dir: &Path) -> CMakeListsTemplate {
         CMakeListsTemplate {
-            manifest_dir: manifest_dir.to_str()
+            manifest_dir: manifest_dir
+                .to_str()
                 .expect("manifest_dir contains non-UTF8 characters"),
         }
     }

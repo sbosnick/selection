@@ -10,10 +10,10 @@ extern crate sel4_sys;
 
 // Implements #TST-sel4syscrate.compile
 //
-// This example code is really just a smoke test to ensure that the 
+// This example code is really just a smoke test to ensure that the
 // build script is properly setting up linking to the sel4 native library.
 // This program isn't really a useful example of anything. It is complied
-// in a std environment (i.e. without #[no_std]) despite the fact that the 
+// in a std environment (i.e. without #[no_std]) despite the fact that the
 // sel4 native library is not designed for such an environment. The resulting
 // binary is unlikely to be able to run usefully in any environment.
 //

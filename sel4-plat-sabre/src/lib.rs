@@ -12,7 +12,7 @@
 //! platform.
 //!
 //! This crate will be empty if the target architecture isn't arm
-//! A side effect of building this project (on the arm architecture) 
+//! A side effect of building this project (on the arm architecture)
 //! is that the seL4 microkernal for the Sabre platform will be built.
 
 #![no_std]

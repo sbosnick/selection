@@ -30,8 +30,15 @@ pub enum CMakeTarget {
 pub enum Platform {
     /// The ia32 and x86_64 PC 99 platform.
     Pc99,
+
+    /// The Sabre platform
     Sabre,
+
+    /// The Omap3 platform (BeagleBoard)
     Omap3,
+
+    /// The Am335x platform (BeagleBone Black)
+    Am335x,
 }
 
 impl CMakeTarget {
@@ -127,14 +134,14 @@ impl CMakeTarget {
     fn should_build(&self, arch: Arch, profile: Profile) -> bool {
         use self::Arch::{Aarch32, Ia32, X86_64};
         use self::CMakeTarget::{Kernel, Library};
-        use self::Platform::{Omap3, Pc99, Sabre};
+        use self::Platform::{Am335x, Omap3, Pc99, Sabre};
         use self::Profile::Release;
 
         match self {
             Library => true,
             Kernel(Pc99) => arch == Ia32 || arch == X86_64,
             Kernel(Sabre) => arch == Aarch32,
-            Kernel(Omap3) => arch == Aarch32 && profile == Release,
+            Kernel(Omap3) | Kernel(Am335x) => arch == Aarch32 && profile == Release,
         }
     }
 }
@@ -147,6 +154,7 @@ impl Platform {
             Pc99 => "pc99",
             Sabre => "imx6",
             Omap3 => "omap3",
+            Am335x => "am335x",
         }
     }
 }
@@ -169,6 +177,9 @@ impl CmakeExt for cmake::Config {
                 }
                 Platform::Omap3 => {
                     self.define("KernelARMPlatform", "omap3");
+                }
+                Platform::Am335x => {
+                    self.define("KernelARMPlatform", "am335x");
                 }
             }
         }

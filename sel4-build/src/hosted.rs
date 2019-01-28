@@ -28,6 +28,7 @@ pub enum Platform {
     /// The ia32 and x86_64 PC 99 platform.
     Pc99,
     Sabre,
+    Omap3,
 }
 
 impl CMakeTarget {
@@ -35,7 +36,8 @@ impl CMakeTarget {
     pub fn build(&self) {
         // check if we sould build anything
         let arch = Arch::from_cargo();
-        if !self.should_build(arch) { return; }
+        let profile = Profile::from_cargo();
+        if !self.should_build(arch, profile) { return; }
 
         // get the build directies
         let dirs = BuildDirs::from_cargo();
@@ -50,7 +52,7 @@ impl CMakeTarget {
             .define("CMAKE_TOOLCHAIN_FILE", dirs.toolchain_file())
             .define("LibSel4FunctionAttributes", "public")
             .set_arch_and_platform(arch, self)
-            .set_profile(Profile::from_cargo())
+            .set_profile(profile)
             .set_cmake_target(self)
             .very_verbose(true)
             .build();
@@ -66,7 +68,8 @@ impl CMakeTarget {
 
         // check if we sould build anything
         let arch = Arch::from_cargo();
-        if !self.should_build(arch) { return; }
+        let profile = Profile::from_cargo();
+        if !self.should_build(arch, profile) { return; }
         
         // get the build directies
         let dirs = BuildDirs::from_cargo();
@@ -112,15 +115,17 @@ impl CMakeTarget {
         }
     }
 
-    fn should_build(&self, arch: Arch) -> bool {
+    fn should_build(&self, arch: Arch, profile: Profile) -> bool {
         use self::CMakeTarget::{Library, Kernel};
-        use self::Platform::{Pc99, Sabre};
+        use self::Platform::{Pc99, Sabre, Omap3};
         use self::Arch::{Ia32, X86_64, Aarch32};
+        use self::Profile::Release;
 
         match self {
             Library => true,
             Kernel(Pc99) => arch == Ia32 || arch == X86_64,
             Kernel(Sabre) => arch == Aarch32,
+            Kernel(Omap3) => arch == Aarch32 && profile == Release,
         }
     }
 }
@@ -132,6 +137,7 @@ impl Platform {
         match self {
             Pc99 => "pc99",
             Sabre => "imx6",
+            Omap3 => "omap3",
         }
     }
 }
@@ -150,6 +156,7 @@ impl CmakeExt for cmake::Config {
             match platform {
                 Platform::Pc99 => {}
                 Platform::Sabre => {self.define("KernelARMPlatform", "sabre");}
+                Platform::Omap3=> {self.define("KernelARMPlatform", "omap3");}
             }
         }
 
@@ -282,6 +289,7 @@ impl From<Arch> for &'static str {
     }
 }
 
+#[derive(Clone, Copy, PartialEq)]
 enum Profile {
     Release,
     Debug,

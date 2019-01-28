@@ -26,8 +26,8 @@ There shall be the following platform crates:
 
 - [[.pc99]]\: ia32 and x86_64
 - [[.sabre]]\: aarch32
-- [[.omap3]]\: aarch32
-- [[.am335x]]\: aarch32
+- [[.omap3]]\: aarch32 (release only)
+- [[.am335x]]\: aarch32 (release only)
 - [[.exynos4]]\: aarch32
 - [[.exynos5410]]\: aarch32
 - [[.exynos5422]]\: aarch32
@@ -52,6 +52,11 @@ the build.rs script shall use [bingen] to generate the platform specific parts o
 libsel4.a. (This may be included as part of sel4-build.) For tx1 and tx2 the platform
 specific files for libsel4.a are empty.
 
+The omap3 and am335x platforms will initially be restricted to supporting the release
+profiled in cargo (i.e. when complied with the --release flag) because of [issue 116].
+Once that issues is resolved **selection** shall [[.support_debug_on_omap]] and
+[[.support_debug_on_am335x]].
+
 [[.profile]]\:The sel4-build crate shall expose two profiles: Default, and Verified.
 Addtional profiles may be added in the future. The Default profile will use the 
 default values for all non-ABI Kernel\* options. The Verified profiles will use 
@@ -67,6 +72,7 @@ that "The KZM is depreciated...".
 [cmake]: https://crates.io/crates/cmake
 [bindgen]: https://crates.io/crates/bindgen
 [sel4-kzm]: https://docs.sel4.systems/Hardware/Kzm.html
+[issue 116]: https://github.com/seL4/seL4/issues/116
 
 
 # TST-sel4platcrate

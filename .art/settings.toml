@@ -18,6 +18,16 @@ code_paths = [
     "sel4-plat-sabre/src/lib.rs",
     "sel4-plat-omap3/src/lib.rs",
     "sel4-plat-am335x/src/lib.rs",
+    "sel4-plat-exynos4/src/lib.rs",
+    "sel4-plat-exynos5410/src/lib.rs",
+    "sel4-plat-exynos5422/src/lib.rs",
+    "sel4-plat-exynos5250/src/lib.rs",
+    "sel4-plat-apq8064/src/lib.rs",
+    "sel4-plat-wandq/src/lib.rs",
+    "sel4-plat-imx7sabre/src/lib.rs",
+    "sel4-plat-zynq7000/src/lib.rs",
+    "sel4-plat-zynqmp/src/lib.rs",
+    "sel4-plat-ultra96/src/lib.rs",
 ]
 
 # Paths to exclude when searching through code

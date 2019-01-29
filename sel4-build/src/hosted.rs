@@ -39,6 +39,36 @@ pub enum Platform {
 
     /// The Am335x platform (BeagleBone Black)
     Am335x,
+
+    /// The Exynos4 platform
+    Exynos4,
+
+    /// The Exynos5410 platform
+    Exynos5410,
+
+    /// The Exynos5422 platform
+    Exynos5422,
+
+    /// The Exynos5250 platform
+    Exynos5250,
+
+    /// The Apq8064 platform
+    Apq8064,
+
+    /// The Wandq platform
+    Wandq,
+
+    /// The Imx7Sabre platform
+    Imx7Sabre,
+
+    /// The Zynq7000 platform
+    Zynq7000,
+
+    /// The Zynqmp platform
+    Zynqmp,
+
+    /// The Ultra96 platform
+    Ultra96,
 }
 
 impl CMakeTarget {
@@ -134,14 +164,18 @@ impl CMakeTarget {
     fn should_build(&self, arch: Arch, profile: Profile) -> bool {
         use self::Arch::{Aarch32, Ia32, X86_64};
         use self::CMakeTarget::{Kernel, Library};
-        use self::Platform::{Am335x, Omap3, Pc99, Sabre};
+        use self::Platform::*;
         use self::Profile::Release;
 
         match self {
             Library => true,
-            Kernel(Pc99) => arch == Ia32 || arch == X86_64,
-            Kernel(Sabre) => arch == Aarch32,
-            Kernel(Omap3) | Kernel(Am335x) => arch == Aarch32 && profile == Release,
+            Kernel(platform) => match platform {
+                Pc99 => arch == Ia32 || arch == X86_64,
+                Sabre | Exynos4 | Exynos5410 | Exynos5422 | Exynos5250 | 
+                    Apq8064 | Wandq | Imx7Sabre | Zynq7000 | Zynqmp | 
+                    Ultra96 => arch == Aarch32,
+                Omap3 | Am335x => arch == Aarch32 && profile == Release,
+            }
         }
     }
 }
@@ -152,9 +186,15 @@ impl Platform {
 
         match self {
             Pc99 => "pc99",
-            Sabre => "imx6",
+            Wandq | Sabre => "imx6",
             Omap3 => "omap3",
             Am335x => "am335x",
+            Exynos5410 | Exynos5422 | Exynos5250 => "exynos5",
+            Ultra96 | Zynqmp => "zynqmp",
+            Exynos4 => "exynos4",
+            Imx7Sabre => "imx7",
+            Apq8064 => "apq804",
+            Zynq7000 => "zynq7000",
         }
     }
 }
@@ -168,20 +208,25 @@ trait CmakeExt {
 impl CmakeExt for cmake::Config {
     fn set_arch_and_platform(&mut self, arch: Arch, target: &CMakeTarget) -> &mut Self {
         use self::CMakeTarget::Kernel;
+        use self::Platform::*;
 
         if let Kernel(platform) = target {
             match platform {
-                Platform::Pc99 => {}
-                Platform::Sabre => {
-                    self.define("KernelARMPlatform", "sabre");
-                }
-                Platform::Omap3 => {
-                    self.define("KernelARMPlatform", "omap3");
-                }
-                Platform::Am335x => {
-                    self.define("KernelARMPlatform", "am335x");
-                }
-            }
+                Pc99 => None,
+                Sabre => Some("sabre"),
+                Omap3 => Some("omap3"),
+                Am335x => Some("am335x"),
+                Exynos4 => Some("exynos4"),
+                Exynos5410 => Some("exynos5410"),
+                Exynos5422 => Some("exynos5422"),
+                Exynos5250 => Some("exynos5250"),
+                Apq8064 => Some("apq8064"),
+                Wandq => Some("wandq"),
+                Imx7Sabre => Some("imx7sabre"),
+                Zynq7000 => Some("zynq7000"),
+                Zynqmp => Some("zynqmp"),
+                Ultra96 => Some("ultra96"),
+            }.map(|plat_name| self.define("KernelARMPlatform", plat_name));
         }
 
         let arch: &str = arch.into();

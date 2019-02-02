@@ -11,7 +11,7 @@ use sel4_build::{CMakeTarget, Platform};
 fn main() {
     let target = CMakeTarget::Kernel(Platform::Exynos4);
 
-    // build the kernel for the Sabre platform
+    // build the kernel for the Exynos4 platform
     target.build();
 
     // generate the rust bindings to the platform specifc parts of the sel4 library

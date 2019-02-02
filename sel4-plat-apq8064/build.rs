@@ -11,7 +11,7 @@ use sel4_build::{CMakeTarget, Platform};
 fn main() {
     let target = CMakeTarget::Kernel(Platform::Apq8064);
 
-    // build the kernel for the Sabre platform
+    // build the kernel for the Apq8064 platform
     target.build();
 
     // generate the rust bindings to the platform specifc parts of the sel4 library

@@ -11,7 +11,7 @@ use sel4_build::{CMakeTarget, Platform};
 fn main() {
     let target = CMakeTarget::Kernel(Platform::Imx7Sabre);
 
-    // build the kernel for the Sabre platform
+    // build the kernel for the Imx7Sabre platform
     target.build();
 
     // generate the rust bindings to the platform specifc parts of the sel4 library

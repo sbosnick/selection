@@ -11,7 +11,7 @@ use sel4_build::{CMakeTarget, Platform};
 fn main() {
     let target = CMakeTarget::Kernel(Platform::Am335x);
 
-    // build the kernel for the Sabre platform
+    // build the kernel for the Am335x platform
     target.build();
 
     // generate the rust bindings to the platform specifc parts of the sel4 library

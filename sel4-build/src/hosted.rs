@@ -125,6 +125,7 @@ impl CMakeTarget {
                 .use_core()
                 .ctypes_prefix("cty")
                 .generate_comments(false)
+                .set_platform_profile(profile)
                 .generate()
                 .unwrap()
                 .write_to_file(dirs.bindings_file())
@@ -252,6 +253,21 @@ impl CmakeExt for cmake::Config {
         match target {
             Library => self.build_target("libsel4.a"),
             Kernel(_) => self.build_target("kernel.elf"),
+        }
+    }
+}
+
+trait BuilderExt {
+    fn set_platform_profile(self, profile: Profile) -> Self;
+}
+
+impl BuilderExt for bindgen::Builder {
+    fn set_platform_profile(self, profile: Profile) -> Self {
+        use self::Profile::{Release, Debug};
+
+        match profile {
+            Release => self,
+            Debug => self.clang_arg("-DCONFIG_HARDWARE_DEBUG_API"),
         }
     }
 }

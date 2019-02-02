@@ -172,11 +172,10 @@ impl CMakeTarget {
             Library => true,
             Kernel(platform) => match platform {
                 Pc99 => arch == Ia32 || arch == X86_64,
-                Sabre | Exynos4 | Exynos5410 | Exynos5422 | Exynos5250 | 
-                    Apq8064 | Wandq | Imx7Sabre | Zynq7000 | Zynqmp | 
-                    Ultra96 => arch == Aarch32,
+                Sabre | Exynos4 | Exynos5410 | Exynos5422 | Exynos5250 | Apq8064 | Wandq
+                | Imx7Sabre | Zynq7000 | Zynqmp | Ultra96 => arch == Aarch32,
                 Omap3 | Am335x => arch == Aarch32 && profile == Release,
-            }
+            },
         }
     }
 }
@@ -227,7 +226,8 @@ impl CmakeExt for cmake::Config {
                 Zynq7000 => Some("zynq7000"),
                 Zynqmp => Some("zynqmp"),
                 Ultra96 => Some("ultra96"),
-            }.map(|plat_name| self.define("KernelARMPlatform", plat_name));
+            }
+            .map(|plat_name| self.define("KernelARMPlatform", plat_name));
         }
 
         let arch: &str = arch.into();
@@ -263,7 +263,7 @@ trait BuilderExt {
 
 impl BuilderExt for bindgen::Builder {
     fn set_platform_profile(self, profile: Profile) -> Self {
-        use self::Profile::{Release, Debug};
+        use self::Profile::{Debug, Release};
 
         match profile {
             Release => self,

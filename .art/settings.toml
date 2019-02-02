@@ -28,6 +28,7 @@ code_paths = [
     "sel4-plat-zynq7000/src/lib.rs",
     "sel4-plat-zynqmp/src/lib.rs",
     "sel4-plat-ultra96/src/lib.rs",
+    "sel4-plat-apq8064/src/lib.rs",
 ]
 
 # Paths to exclude when searching through code

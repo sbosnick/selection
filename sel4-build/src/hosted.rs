@@ -193,7 +193,7 @@ impl Platform {
             Ultra96 | Zynqmp => "zynqmp",
             Exynos4 => "exynos4",
             Imx7Sabre => "imx7",
-            Apq8064 => "apq804",
+            Apq8064 => "apq8064",
             Zynq7000 => "zynq7000",
         }
     }

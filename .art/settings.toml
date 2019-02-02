@@ -32,6 +32,7 @@ code_paths = [
     "sel4-plat-wandq/src/lib.rs",
     "sel4-plat-imx7sabre/src/lib.rs",
     "sel4-plat-zynq7000/src/lib.rs",
+    "sel4-plat-zynqmp/src/lib.rs",
 ]
 
 # Paths to exclude when searching through code

@@ -15,5 +15,5 @@ members = [
     "sel4-plat-imx7sabre",
     "sel4-plat-zynq7000",
     "sel4-plat-zynqmp",
-#    "sel4-plat-ultra96",
+    "sel4-plat-ultra96",
 ]

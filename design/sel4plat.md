@@ -48,7 +48,7 @@ There shall be the following platform crates:
 The platform crates shall build the seL4 microkernal when they are being built for
 the architecture listed, but is shall not be an error if the platform crate is being
 built for a different architecture. For all of the platform crates except tx1 and tx2
-the build.rs script shall use [bingen] to generate the platform specific parts of 
+the build.rs script shall use [bindgen] to generate the platform specific parts of 
 libsel4.a. (This may be included as part of sel4-build.) For tx1 and tx2 the platform
 specific files for libsel4.a are empty.
 

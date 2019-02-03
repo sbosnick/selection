@@ -69,6 +69,9 @@ pub enum Platform {
 
     /// The Ultra96 platform
     Ultra96,
+
+    /// The Tk1 platform
+    Tk1,
 }
 
 impl CMakeTarget {
@@ -173,7 +176,7 @@ impl CMakeTarget {
             Kernel(platform) => match platform {
                 Pc99 => arch == Ia32 || arch == X86_64,
                 Sabre | Exynos4 | Exynos5410 | Exynos5422 | Exynos5250 | Apq8064 | Wandq
-                | Imx7Sabre | Zynq7000 | Zynqmp | Ultra96 => arch == Aarch32,
+                | Imx7Sabre | Zynq7000 | Zynqmp | Ultra96 | Tk1 => arch == Aarch32,
                 Omap3 | Am335x => arch == Aarch32 && profile == Release,
             },
         }
@@ -195,6 +198,7 @@ impl Platform {
             Imx7Sabre => "imx7",
             Apq8064 => "apq8064",
             Zynq7000 => "zynq7000",
+            Tk1 => "tk1",
         }
     }
 }
@@ -226,6 +230,7 @@ impl CmakeExt for cmake::Config {
                 Zynq7000 => Some("zynq7000"),
                 Zynqmp => Some("zynqmp"),
                 Ultra96 => Some("ultra96"),
+                Tk1 => Some("tk1"),
             }
             .map(|plat_name| self.define("KernelARMPlatform", plat_name));
         }

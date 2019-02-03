@@ -24,7 +24,7 @@ each platform crate.
 
 There shall be the following platform crates:
 
-- [[.pc99]]\: ia32 and x86_64
+- [[.pc99]]\: x86_64
 - [[.sabre]]\: aarch32
 - [[.omap3]]\: aarch32 (release only)
 - [[.am335x]]\: aarch32 (release only)

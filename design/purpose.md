@@ -64,6 +64,10 @@ come with Rust's borrow checker, but it may have limits on its scaleability. **s
 is an attept to combine the formally proven seL4 microkernel with the addition assurances
 that Rust brings for the parts of the whole system that are not formally proven.
 
+**selection** shall support the following architectures: x86_64, aarch32, and aarch64.
+It will not initally support the ia32 (or i686) architecture, though such support may be
+added later if an appropriate target spec json can be developed.
+
 
 # REQ-testing
 partof: REQ-purpose

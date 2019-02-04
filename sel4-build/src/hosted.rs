@@ -131,7 +131,7 @@ impl CMakeTarget {
                 .use_core()
                 .ctypes_prefix("cty")
                 .generate_comments(false)
-                .set_platform_profile(profile)
+                .set_platform_profile(profile, arch)
                 .generate()
                 .unwrap()
                 .write_to_file(dirs.bindings_file())
@@ -275,16 +275,17 @@ impl CmakeExt for cmake::Config {
 }
 
 trait BuilderExt {
-    fn set_platform_profile(self, profile: Profile) -> Self;
+    fn set_platform_profile(self, profile: Profile, arch: Arch) -> Self;
 }
 
 impl BuilderExt for bindgen::Builder {
-    fn set_platform_profile(self, profile: Profile) -> Self {
+    fn set_platform_profile(self, profile: Profile, arch: Arch) -> Self {
         use self::Profile::{Debug, Release};
+        use self::Arch::Aarch64;
 
-        match profile {
-            Release => self,
-            Debug => self.clang_arg("-DCONFIG_HARDWARE_DEBUG_API"),
+        match (profile, arch) {
+            (Release, _) | (Debug, Aarch64) => self,
+            (Debug, _) => self.clang_arg("-DCONFIG_HARDWARE_DEBUG_API"),
         }
     }
 }

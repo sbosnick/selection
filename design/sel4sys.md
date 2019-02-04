@@ -31,10 +31,13 @@ libsel4 as described below.
 - KernelVerificationBuild: PROFILE
 - KernelDebugBuild: PROFILE
 - KernelPrinting: PROFILE
-- HardwareDebugAPI: PROFILE
+- HardwareDebugAPI: PROFILE and CARGO_CFG_TARGET_ARCH
 - KernelDangerousCodeInjection: off (default)
 - KernelX86DangerousMSR: off (default)
 - LibSel4FunctionAttributes: set to "public"
+
+HardwareDebugAPI will be off for a release build or an AArch64 debug build and will
+be on for other debug builds.
 
 All other cmake configuration options will use their default values.
 

@@ -72,6 +72,9 @@ pub enum Platform {
 
     /// The Tk1 platform
     Tk1,
+
+    /// The Hikey plaftorm
+    Hikey,
 }
 
 impl CMakeTarget {
@@ -97,7 +100,7 @@ impl CMakeTarget {
             .define("CMAKE_TOOLCHAIN_FILE", dirs.toolchain_file())
             .define("LibSel4FunctionAttributes", "public")
             .set_arch_and_platform(arch, self)
-            .set_profile(profile)
+            .set_profile(profile, arch)
             .set_cmake_target(self)
             .very_verbose(true)
             .build();
@@ -166,7 +169,7 @@ impl CMakeTarget {
     }
 
     fn should_build(&self, arch: Arch, profile: Profile) -> bool {
-        use self::Arch::{Aarch32, Ia32, X86_64};
+        use self::Arch::{Aarch32, Aarch64, Ia32, X86_64};
         use self::CMakeTarget::{Kernel, Library};
         use self::Platform::*;
         use self::Profile::Release;
@@ -178,6 +181,7 @@ impl CMakeTarget {
                 Sabre | Exynos4 | Exynos5410 | Exynos5422 | Exynos5250 | Apq8064 | Wandq
                 | Imx7Sabre | Zynq7000 | Zynqmp | Ultra96 | Tk1 => arch == Aarch32,
                 Omap3 | Am335x => arch == Aarch32 && profile == Release,
+                Hikey => arch == Aarch32 || arch == Aarch64,
             },
         }
     }
@@ -199,13 +203,14 @@ impl Platform {
             Apq8064 => "apq8064",
             Zynq7000 => "zynq7000",
             Tk1 => "tk1",
+            Hikey => "hikey",
         }
     }
 }
 
 trait CmakeExt {
     fn set_arch_and_platform(&mut self, arch: Arch, target: &CMakeTarget) -> &mut Self;
-    fn set_profile(&mut self, profile: Profile) -> &mut Self;
+    fn set_profile(&mut self, profile: Profile, arch: Arch) -> &mut Self;
     fn set_cmake_target(&mut self, target: &CMakeTarget) -> &mut Self;
 }
 
@@ -231,6 +236,7 @@ impl CmakeExt for cmake::Config {
                 Zynqmp => Some("zynqmp"),
                 Ultra96 => Some("ultra96"),
                 Tk1 => Some("tk1"),
+                Hikey => Some("hikey"),
             }
             .map(|plat_name| self.define("KernelARMPlatform", plat_name));
         }
@@ -239,15 +245,21 @@ impl CmakeExt for cmake::Config {
         self.define(arch, "1")
     }
 
-    fn set_profile(&mut self, profile: Profile) -> &mut Self {
+    fn set_profile(&mut self, profile: Profile, arch: Arch) -> &mut Self {
         use self::Profile::*;
+        use self::Arch::Aarch64;
 
-        match profile {
+        let result = match profile {
             Release => self.define("KernelVerificationBuild", "ON"),
             Debug => self
                 .define("KernelVerificationBuild", "OFF")
                 .define("KernelDebugBuild", "ON")
-                .define("KernelPrinting", "ON")
+                .define("KernelPrinting", "ON"),
+        };
+
+        match (profile, arch) {
+            (Release, _) | (Debug, Aarch64) => result,
+            (Debug, _) => result
                 .define("HardwareDebugAPI", "ON"),
         }
     }

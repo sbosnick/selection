@@ -1,0 +1,37 @@
+{
+  "abi-blacklist": [
+    "stdcall",
+    "fastcall",
+    "vectorcall",
+    "thiscall",
+    "win64",
+    "sysv64"
+  ],
+  "arch": "aarch64",
+  "cpu": "cortex-a57",
+  "data-layout": "e-m:e-i8:8:32-i16:16:32-i64:64-i128:128-n32:64-S128",
+  "dynamic-linking": false,
+  "env": "elf",
+  "executables": true,
+  "features": "+a57,+fullfp16,-neon",
+  "has-elf-tls": true,
+  "has-rpath": true,
+  "linker": "rust-lld",
+  "linker-flavor": "ld.lld",
+  "llvm-target": "aarch64-elf",
+  "max-atomic-width": 128,
+  "no-compiler-rt": false,
+  "no-default-libraries": true,
+  "os": "none",
+  "panic-strategy": "abort",
+  "position-independent-executables": false,
+  "pre-link-args": {
+    "gcc": ["-m64", "-ffreestanding", "-nodefaultlibs", "-nostdlib"]
+  },
+  "relocation-model": "static",
+  "target-c-int-width": "32",
+  "target-endian": "little",
+  "target-family": "unix",
+  "target-pointer-width": "64",
+  "vendor": "unknown"
+}

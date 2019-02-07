@@ -75,6 +75,9 @@ pub enum Platform {
 
     /// The Hikey plaftorm
     Hikey,
+
+    /// The Raspberry PI 3 platform
+    RPi3,
 }
 
 impl CMakeTarget {
@@ -181,7 +184,7 @@ impl CMakeTarget {
                 Sabre | Exynos4 | Exynos5410 | Exynos5422 | Exynos5250 | Apq8064 | Wandq
                 | Imx7Sabre | Zynq7000 | Zynqmp | Ultra96 | Tk1 => arch == Aarch32,
                 Omap3 | Am335x => arch == Aarch32 && profile == Release,
-                Hikey => arch == Aarch32 || arch == Aarch64,
+                RPi3 | Hikey => arch == Aarch32 || arch == Aarch64,
             },
         }
     }
@@ -204,6 +207,7 @@ impl Platform {
             Zynq7000 => "zynq7000",
             Tk1 => "tk1",
             Hikey => "hikey",
+            RPi3 => "bcm2837",
         }
     }
 }
@@ -237,6 +241,7 @@ impl CmakeExt for cmake::Config {
                 Ultra96 => Some("ultra96"),
                 Tk1 => Some("tk1"),
                 Hikey => Some("hikey"),
+                RPi3 => Some("rpi3"),
             }
             .map(|plat_name| self.define("KernelARMPlatform", plat_name));
         }

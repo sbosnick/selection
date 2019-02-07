@@ -53,7 +53,7 @@ libsel4.a. (This may be included as part of sel4-build.) For tx1 and tx2 the pla
 specific files for libsel4.a are empty.
 
 The omap3 and am335x platforms will initially be restricted to supporting the release
-profiled in cargo (i.e. when complied with the --release flag) because of [issue 116].
+profile in cargo (i.e. when complied with the --release flag) because of [issue 116].
 Once that issue is resolved **selection** shall [[.support_debug_on_omap]] and
 [[.support_debug_on_am335x]].
 

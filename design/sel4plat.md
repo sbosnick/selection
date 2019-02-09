@@ -47,10 +47,9 @@ There shall be the following platform crates:
 
 The platform crates shall build the seL4 microkernal when they are being built for
 the architecture listed, but is shall not be an error if the platform crate is being
-built for a different architecture. For all of the platform crates except tx1 and tx2
-the build.rs script shall use [bindgen] to generate the platform specific parts of 
-libsel4.a. (This may be included as part of sel4-build.) For tx1 and tx2 the platform
-specific files for libsel4.a are empty.
+built for a different architecture. For all of the platform crates the build.rs 
+script shall use [bindgen] to generate the platform specific parts of libsel4.a. 
+(This may be included as part of sel4-build.)
 
 The omap3 and am335x platforms will initially be restricted to supporting the release
 profile in cargo (i.e. when complied with the --release flag) because of [issue 116].

@@ -78,6 +78,9 @@ pub enum Platform {
 
     /// The Raspberry PI 3 platform
     RPi3,
+
+    /// The Tx1 platform
+    Tx1
 }
 
 impl CMakeTarget {
@@ -185,6 +188,7 @@ impl CMakeTarget {
                 | Imx7Sabre | Zynq7000 | Zynqmp | Ultra96 | Tk1 => arch == Aarch32,
                 Omap3 | Am335x => arch == Aarch32 && profile == Release,
                 RPi3 | Hikey => arch == Aarch32 || arch == Aarch64,
+                Tx1 => arch == Aarch64,
             },
         }
     }
@@ -208,6 +212,7 @@ impl Platform {
             Tk1 => "tk1",
             Hikey => "hikey",
             RPi3 => "bcm2837",
+            Tx1 => "tx1",
         }
     }
 }
@@ -242,6 +247,7 @@ impl CmakeExt for cmake::Config {
                 Tk1 => Some("tk1"),
                 Hikey => Some("hikey"),
                 RPi3 => Some("rpi3"),
+                Tx1 => Some("tx1"),
             }
             .map(|plat_name| self.define("KernelARMPlatform", plat_name));
         }

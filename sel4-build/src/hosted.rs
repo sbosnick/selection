@@ -80,7 +80,7 @@ pub enum Platform {
     RPi3,
 
     /// The Tx1 platform
-    Tx1
+    Tx1,
 }
 
 impl CMakeTarget {
@@ -257,8 +257,8 @@ impl CmakeExt for cmake::Config {
     }
 
     fn set_profile(&mut self, profile: Profile, arch: Arch) -> &mut Self {
-        use self::Profile::*;
         use self::Arch::Aarch64;
+        use self::Profile::*;
 
         let result = match profile {
             Release => self.define("KernelVerificationBuild", "ON"),
@@ -270,8 +270,7 @@ impl CmakeExt for cmake::Config {
 
         match (profile, arch) {
             (Release, _) | (Debug, Aarch64) => result,
-            (Debug, _) => result
-                .define("HardwareDebugAPI", "ON"),
+            (Debug, _) => result.define("HardwareDebugAPI", "ON"),
         }
     }
 
@@ -291,8 +290,8 @@ trait BuilderExt {
 
 impl BuilderExt for bindgen::Builder {
     fn set_platform_profile(self, profile: Profile, arch: Arch) -> Self {
-        use self::Profile::{Debug, Release};
         use self::Arch::Aarch64;
+        use self::Profile::{Debug, Release};
 
         match (profile, arch) {
             (Release, _) | (Debug, Aarch64) => self,

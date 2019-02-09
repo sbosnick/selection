@@ -11,8 +11,8 @@
 //! This crate provides the platform specifc parts of the sel4 library for the
 //! Raspberry PI 3 platform.
 //!
-//! This crate will be empty if the target architecture isn't arm
-//! A side effect of building this project (on the arm architecture)
+//! This crate will be empty if the target architecture isn't arm or aarch64
+//! A side effect of building this project (on the arm or aarch64 architectures)
 //! is that the seL4 microkernal for the Raspberry PI 3 platform will be built.
 
 #![no_std]

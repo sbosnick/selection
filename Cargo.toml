@@ -20,4 +20,5 @@ members = [
     "sel4-plat-hikey",
     "sel4-plat-rpi3",
     "sel4-plat-tx1",
+    "sel4-plat-tx2",
 ]

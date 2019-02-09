@@ -55,3 +55,6 @@
 [submodule "sel4-plat-tx1/seL4"]
 	path = sel4-plat-tx1/seL4
 	url = https://github.com/seL4/seL4.git
+[submodule "sel4-plat-tx2/seL4"]
+	path = sel4-plat-tx2/seL4
+	url = https://github.com/seL4/seL4.git

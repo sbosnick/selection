@@ -81,6 +81,9 @@ pub enum Platform {
 
     /// The Tx1 platform
     Tx1,
+
+    /// The Tx2 platform
+    Tx2, 
 }
 
 impl CMakeTarget {
@@ -188,7 +191,7 @@ impl CMakeTarget {
                 | Imx7Sabre | Zynq7000 | Zynqmp | Ultra96 | Tk1 => arch == Aarch32,
                 Omap3 | Am335x => arch == Aarch32 && profile == Release,
                 RPi3 | Hikey => arch == Aarch32 || arch == Aarch64,
-                Tx1 => arch == Aarch64,
+                Tx1 | Tx2 => arch == Aarch64,
             },
         }
     }
@@ -213,6 +216,7 @@ impl Platform {
             Hikey => "hikey",
             RPi3 => "bcm2837",
             Tx1 => "tx1",
+            Tx2 => "tx2",
         }
     }
 }
@@ -248,6 +252,7 @@ impl CmakeExt for cmake::Config {
                 Hikey => Some("hikey"),
                 RPi3 => Some("rpi3"),
                 Tx1 => Some("tx1"),
+                Tx2 => Some("tx2"),
             }
             .map(|plat_name| self.define("KernelARMPlatform", plat_name));
         }

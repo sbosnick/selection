@@ -1,0 +1,12 @@
+[package]
+name = "sel4-plat-tx2"
+version = "0.1.0"
+authors = ["Steven Bosnick <sbosnick@sympatico.ca>"]
+edition = "2018"
+build = "build.rs"
+
+[dependencies]
+cty = "0.1.5"
+
+[build-dependencies]
+sel4-build = { path = "../sel4-build" }

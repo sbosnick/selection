@@ -38,6 +38,7 @@ code_paths = [
     "sel4-plat-hikey/src/lib.rs",
     "sel4-plat-rpi3/src/lib.rs",
     "sel4-plat-tx1/src/lib.rs",
+    "sel4-plat-tx2/src/lib.rs",
 ]
 
 # Paths to exclude when searching through code

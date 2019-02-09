@@ -11,7 +11,7 @@ specific parts of libsel4 for a given platform.
 The platform crates shall also compile the seL4 microkernel binary itself as a side
 effect of being built.
 
-The platform crates shall expose *cargo* features for "profiles" of seL4 Kernel\*
+The platform crates shall expose *cargo* features for "classes" of seL4 Kernel\*
 non-ABI options.
 
 
@@ -56,12 +56,12 @@ profile in cargo (i.e. when complied with the --release flag) because of [issue 
 Once that issue is resolved **selection** shall [[.support_debug_on_omap]] and
 [[.support_debug_on_am335x]].
 
-[[.profile]]\:The sel4-build crate shall expose two profiles: Default, and Verified.
-Addtional profiles may be added in the future. The Default profile will use the 
-default values for all non-ABI Kernel\* options. The Verified profiles will use 
+[[.class]]\:The sel4-build crate shall expose two classes: Default, and Verified.
+Addtional classes may be added in the future. The Default class will use the 
+default values for all non-ABI Kernel\* options. The Verified class will use 
 the values from the .cmake files in the configs subdirectory of the seL4 project 
-root for the non-default values of non-ABI Kernel\* options. The Verified profile 
-shall be exposed in each platform crate with a "verified-profile" feature.
+root for the non-default values of non-ABI Kernel\* options. The Verified class
+shall be exposed in each platform crate with a "verified-class" feature.
 
 **selection** will not support the kzm platform for two reasons. First, it is the
 only ARMv6A platform supported by seL4 and would require its own target specification

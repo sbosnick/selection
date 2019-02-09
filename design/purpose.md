@@ -25,7 +25,7 @@ Kernel\* ABI options shall be disabled.
 
 ## Kernel\* non-ABI Options
 Kernel\* options that do not affect the user/kernel ABI (i.e. tweaks) shall be
-grouped into meaningful "profiles" which are then exposed as *cargo* features on
+grouped into meaningful "classes" which are then exposed as *cargo* features on
 all of the platform crates.
 
 ## LibSel4\* options

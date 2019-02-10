@@ -108,7 +108,7 @@ impl CMakeTarget {
             .generator("Ninja")
             .define("CMAKE_TOOLCHAIN_FILE", dirs.toolchain_file())
             .define("LibSel4FunctionAttributes", "public")
-            .set_arch_and_platform(arch, self)
+            .set_arch_and_platform(arch, self, BuildClass::from_cargo())
             .set_profile(profile, arch)
             .set_cmake_target(self)
             .very_verbose(true)
@@ -222,13 +222,14 @@ impl Platform {
 }
 
 trait CmakeExt {
-    fn set_arch_and_platform(&mut self, arch: Arch, target: &CMakeTarget) -> &mut Self;
+    fn set_arch_and_platform(&mut self, arch: Arch, target: &CMakeTarget, class: BuildClass) -> &mut Self;
     fn set_profile(&mut self, profile: Profile, arch: Arch) -> &mut Self;
     fn set_cmake_target(&mut self, target: &CMakeTarget) -> &mut Self;
+    fn set_build_class(&mut self, class: BuildClass, arch: Arch) -> &mut Self;
 }
 
 impl CmakeExt for cmake::Config {
-    fn set_arch_and_platform(&mut self, arch: Arch, target: &CMakeTarget) -> &mut Self {
+    fn set_arch_and_platform(&mut self, arch: Arch, target: &CMakeTarget, class: BuildClass) -> &mut Self {
         use self::CMakeTarget::Kernel;
         use self::Platform::*;
 
@@ -255,6 +256,8 @@ impl CmakeExt for cmake::Config {
                 Tx2 => Some("tx2"),
             }
             .map(|plat_name| self.define("KernelARMPlatform", plat_name));
+
+            self.set_build_class(class, arch);
         }
 
         let arch: &str = arch.into();
@@ -285,6 +288,33 @@ impl CmakeExt for cmake::Config {
         match target {
             Library => self.build_target("libsel4.a"),
             Kernel(_) => self.build_target("kernel.elf"),
+        }
+    }
+
+    // Implements #SPC-sel4platcrate.class
+    fn set_build_class(&mut self, class: BuildClass, arch: Arch) -> &mut Self {
+        // Note: the settings for BuildClass::Verified are based on the non-ABI 
+        // settings from the ARM_verified.cmake and X64_verfied.cmake files in 
+        // the configs directory of the seL4 repository. Settings that match
+        // the default setting are not redundantly re-set. Also, those .cmake
+        // files include a setting for 'KernelMaxNumBootinfoUntypedCap' (without
+        // the trailing 's') which does not appear to be a real setting. That 
+        // setting is not included here.
+
+        use self::BuildClass::{Default, Verified};
+        use self::Arch::X86_64;
+
+        let result = match class {
+            Default => self,
+            Verified => self
+                .define("KernelNumDomains", "16")
+        };
+
+        match (class, arch) {
+            (Verified, X86_64) => result
+                .define("KernelRootCNodeSizeBits", "19")
+                .define("KernelMaxNumBootinfoUntypedCaps", "50"),
+            _ => result,
         }
     }
 }
@@ -427,6 +457,21 @@ impl Profile {
     fn from_cargo() -> Profile {
         Profile::new(env::var("PROFILE").expect("PROFILE not set."))
             .expect("PROFILE not set to recognized profile.")
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
+enum BuildClass {
+    Default,
+    Verified,
+}
+
+impl BuildClass {
+    fn from_cargo() -> BuildClass {
+        match env::var_os("CARGO_FEATURE_VERIFIED_CLASS") {
+            Some(_) => BuildClass::Verified,
+            None => BuildClass::Default,
+        }
     }
 }
 

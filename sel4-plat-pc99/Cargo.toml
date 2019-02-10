@@ -13,3 +13,6 @@ path = "../sel4-build"
 
 [dependencies]
 cty = "0.1.5"
+
+[features]
+verified-class = []

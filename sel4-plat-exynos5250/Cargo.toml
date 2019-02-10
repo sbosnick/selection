@@ -10,3 +10,6 @@ cty = "0.1.5"
 
 [build-dependencies]
 sel4-build = { path = "../sel4-build" }
+
+[features]
+verified-class = []

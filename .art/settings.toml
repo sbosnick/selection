@@ -14,6 +14,7 @@ code_paths = [
     "sel4-sys/tests/platform.rs",
     "sel4-sys/examples/smoketest.rs",
     "sel4-build/src/lib.rs",
+    "sel4-build/src/hosted.rs",
     "sel4-plat-pc99/src/lib.rs",
     "sel4-plat-sabre/src/lib.rs",
     "sel4-plat-omap3/src/lib.rs",

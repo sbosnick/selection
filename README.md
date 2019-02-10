@@ -13,14 +13,6 @@ options. You should prefer [fel4] until this project matures more.
 
 [fel4]:https://crates.io/crates/cargo-fel4
 
-
-Luther generates the lexer through its macros 1.1 derive implementation in the [luther-derive]
-crate. You annotate your token `enum` with regular expressions (through the `#[luther(...)]`
-attribute) and then `#[derive(Lexer)]` on it. Unlike many other approaches in Rust to lexing 
-(or tokenizing), Luther does not operate on `&str` but rather on `char` iterators. The 
-`luther::spanned` module, though, contains extension traits to produce such `char` iterators
-from a `&str` or from a `std::io::Read` implementation.
-
 ## License
 
 Luther is licensed under either of

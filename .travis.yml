@@ -13,4 +13,4 @@ rust:
     - nightly
 
 before_install:
-    - pip install sel4-deps
+    - pip install --user sel4-deps

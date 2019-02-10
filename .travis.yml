@@ -2,5 +2,15 @@ language: rust
 
 cache: cargo
 
+addons:
+    apt:
+        packages:
+            # packages needed for the seL4 build
+            - ninja-build
+            - libxml2-utils
+
 rust:
     - nightly
+
+before_install:
+    - pip install sel4-deps

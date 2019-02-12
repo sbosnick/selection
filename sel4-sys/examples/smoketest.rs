@@ -6,21 +6,36 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms
 
-extern crate sel4_sys;
+#![cfg_attr(target_os = "none", no_std)]
+#![cfg_attr(target_os = "none", no_main)]
 
-// Implements #TST-sel4syscrate.compile
-//
-// This example code is really just a smoke test to ensure that the
-// build script is properly setting up linking to the sel4 native library.
-// This program isn't really a useful example of anything. It is complied
-// in a std environment (i.e. without #[no_std]) despite the fact that the
-// sel4 native library is not designed for such an environment. The resulting
-// binary is unlikely to be able to run usefully in any environment.
-//
-// This smoke test was designed this way because the other crates necessary for
-// a proper test haven't yet been written.
+#[cfg(not(target_os = "none"))]
 fn main() {
-    unsafe {
-        sel4_sys::seL4_DebugPutChar(72);
+    println!("The smoke test is not designed for a hosted environment.");
+}
+
+#[cfg(target_os = "none")]
+#[no_mangle]
+pub extern "C" fn _start() -> ! {
+    freestanding::main();
+
+    loop {}
+}
+
+#[cfg(target_os = "none")]
+mod freestanding {
+    extern crate sel4_sys;
+    use core::panic::PanicInfo;
+
+    // Implements #TST-sel4syscrate.compile
+    pub fn main() {
+        unsafe {
+            sel4_sys::seL4_DebugPutChar(72);
+        }
+    }
+
+    #[panic_handler]
+    fn panic(_info: &PanicInfo) -> ! {
+        loop {}
     }
 }

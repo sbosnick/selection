@@ -20,9 +20,11 @@ fn main() {
     target.bindgen();
 
     // outuput the cargo metadata to link with libsel4.a
-    println!("cargo:rustc-link-lib=static=sel4");
-    println!(
-        "cargo:rustc-link-search=native={}",
-        sel4_build::get_cargo_var("OUT_DIR")
-    );
+    if sel4_build::get_cargo_var("CARGO_CFG_TARGET_OS") == "none" {
+        println!("cargo:rustc-link-lib=static=sel4");
+        println!(
+            "cargo:rustc-link-search=native={}",
+            sel4_build::get_cargo_var("OUT_DIR")
+        );
+    }
 }

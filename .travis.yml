@@ -10,6 +10,8 @@ addons:
             # packages needed for the seL4 build
             - ninja-build
             - libxml2-utils
+            # cross compilers
+            - gcc-arm-linux-gnueabi
 
 rust:
     - nightly

@@ -45,6 +45,9 @@ script:
       else
         cargo xbuild --target ${TARGET} --verbose --release
         && cargo xbuild --target ${TARGET} --verbose --package sel4-sys --example smoketest
-        && find . -path './sel4-plat-*/Cargo.toml' -exec cargo xbuild --target ${TARGET} --verbose --manifest-path {} --features verified-class;
+        && find . -path './sel4-plat-*/Cargo.toml' -exec 
+                cargo xbuild --target ${TARGET} --verbose --manifest-path {} --features verified-class
+            \;
+        ;
       fi
 

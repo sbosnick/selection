@@ -28,9 +28,8 @@ env:
 before_install:
     - pip install --user sel4-deps
     - rustup component add rust-src
-    - cargo install cargo-xbuild
-    - cargo install cargo-update
-    - cargo install-update cargo-xbuild cargo-update
+    - cargo install cargo-update || true
+    - cargo install-update -i cargo-xbuild cargo-update
 
 install:
     - if [ $TARGET == "host" ]; then

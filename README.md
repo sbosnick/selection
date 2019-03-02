@@ -2,6 +2,9 @@
 
 **Selection provides an embedding of the seL4 microkernal in the Rust ecosystem.**
 
+[![Build Status](https://travis-ci.org/sbosnick/selection.svg?branch=master)](https://travis-ci.org/sbosnick/selection)
+---
+
 Selection is an experimental attempt to provide a natual embedding of the building 
 of a sytem based around the seL4 microkernal into the Rust ecosystem. A project
 using this embedding will be built using *cargo* and will be able to be bootstrapped

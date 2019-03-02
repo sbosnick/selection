@@ -13,6 +13,8 @@ addons:
             # cross compilers
             - gcc-arm-linux-gnueabi
             - libc6-dev-armel-cross
+            - gcc-aarch64-linux-gnu
+            - libc6-dev-arm64-cross
 
 rust:
     - nightly
@@ -23,8 +25,8 @@ env:
     matrix:
         - TARGET=host
         - TARGET=armv7-unknown-none-eabi
-          #- TARGET=aarch64-unknown-none-elf
-          #- TARGET=x86_64-unknown-none-elf
+        - TARGET=aarch64-unknown-none-elf
+        - TARGET=x86_64-unknown-none-elf
 
 before_install:
     - pip install --user sel4-deps

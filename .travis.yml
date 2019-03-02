@@ -12,6 +12,7 @@ addons:
             - libxml2-utils
             # cross compilers
             - gcc-arm-linux-gnueabi
+            - libc6-dev-armel-cross
 
 rust:
     - nightly

@@ -29,10 +29,12 @@ env:
         - TARGET=x86_64-unknown-none-elf
 
 before_install:
+    - export PATH=$PATH:$HOME/.local/bin
     - pip install --user sel4-deps
     - rustup component add rust-src
     - cargo install cargo-update || true
     - cargo install-update -i cargo-xbuild cargo-update
+    - ci/install_artifact 2.1.5 $HOME/.local/bin
 
 install:
     - if [ $TARGET == "host" ]; then
@@ -53,3 +55,13 @@ script:
         ;
       fi
 
+after_success:
+    - art export html target/design
+
+deploy:
+    provider: pages
+    github-token: $GITHUB_TOKEN # Set in Travis repository settings
+    local-dir: target/design
+    on:
+        branch: master
+        condition: "$TARGET == host"

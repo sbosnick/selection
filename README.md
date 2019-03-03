@@ -18,7 +18,7 @@ options. You should prefer [fel4] until this project matures more.
 
 ## Status
 Selection is in the early design and implementation stage. Currently the best way
-learn more about this project is the [design artifacts][selecton-design]:
+learn more about this project is the [design artifacts][selection-design]:
 
  * The requirements: *REQ-*
  * The specifications: *SPC-*

@@ -62,6 +62,7 @@ deploy:
     provider: pages
     github-token: $GITHUB_TOKEN # Set in Travis repository settings
     local-dir: target/design
+    skip_cleanup: true
     on:
         branch: master
         condition: "$TARGET == host"

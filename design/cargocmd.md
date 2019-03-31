@@ -50,18 +50,6 @@ in a "package.metadata" table).
 [failure]: https://crates.io/crates/failure
 
 
-# TST-cargocmd
-"cargo-fit" shall have at least the following tests
-
-- [[.nobootloader]]: a workspace without a bootloader crate is an error
-- [[.nokernel]]: a workspace that does not build the seL4 microkernel through
-    a sel4-plat-\* crate is an error
-- [[.manykernels]]: a workspace that builds more than 1 seL4 microkernel is an error
-- [[.norootserver]]: a workspace without a rootserver is an error
-- [[.sucess]]: a workspace with a bootloader, a rootserver, and exactly one
-    seL4 microkernel shall sucessfully produce the expected output file
-
-
 # SPC-elfpreload
 partof: SPC-cargocmd
 ###
@@ -186,6 +174,18 @@ are required to be post-processed ELF files.
 [device tree specification]: https://github.com/devicetree-org/devicetree-specification/releases/tag/v0.2
 [fit-format]: https://github.com/u-boot/u-boot/blob/master/doc/uImage.FIT/source_file_format.txt
 [string-interner]: https://crates.io/crates/string-interner
+
+
+# TST-cargocmd
+"cargo-fit" shall have at least the following tests
+
+- [[.nobootloader]]: a workspace without a bootloader crate is an error
+- [[.nokernel]]: a workspace that does not build the seL4 microkernel through
+    a sel4-plat-\* crate is an error
+- [[.manykernels]]: a workspace that builds more than 1 seL4 microkernel is an error
+- [[.norootserver]]: a workspace without a rootserver is an error
+- [[.sucess]]: a workspace with a bootloader, a rootserver, and exactly one
+    seL4 microkernel shall sucessfully produce the expected output file
 
 
 # TST-elfpreload

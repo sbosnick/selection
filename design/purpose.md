@@ -37,9 +37,8 @@ interface to the libsel4 library.
 partof: REQ-purpose
 ###
 The final binary produced by the *cargo* build shall be a single file that can be
-booted by the *U-Boot* `bootm` command. It will be produced by a custom *cargo*
-subcommand which in turn invokes the *U-Boot* mkimage command to create a FIT
-format file.
+booted by the *U-Boot* `bootm` command. It shall be produced by a custom *cargo*
+subcommand.
 
 The final FIT file shall contain three executables (which will be post-processed
 ELF files) as follow:

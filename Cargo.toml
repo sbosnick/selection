@@ -1,5 +1,6 @@
 [workspace]
 members = [
+    "elf-preload",
     "sel4-sys", 
     "sel4-build", 
     "sel4-plat-pc99",

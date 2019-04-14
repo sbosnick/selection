@@ -32,15 +32,17 @@
 
 #[deny(missing_docs, unsafe_code)]
 
+#[cfg(test)]
+#[macro_use]
+extern crate assert_matches;
+
 mod error;
-pub use error::{Error, Result};
+mod input;
+
+pub use input::Input;
+pub use error::{BadElfError, Error, Result};
 
 use std::marker::PhantomData;
-
-/// An input ELF file that satisfies the necessary constraints for direct loading.
-pub struct Input<'a> {
-    _phantom: PhantomData<&'a u8>,
-}
 
 /// The layout of the output file. Created by the [`layout`][Input::layout] method.
 pub struct Layout<'a> {
@@ -63,19 +65,6 @@ pub enum StartPAddr {
 
     /// The starting physical address is set to the specified physical address.
     Specified(u64),
-}
-
-impl<'a> Input<'a> {
-    /// Create a new `Input` from the given input bytes.
-    pub fn new(_input: &'a [u8]) -> Result<Self> {
-        unimplemented!()
-    }
-
-    /// Layout the output file using the given strategy for selecting the
-    /// starting physical address.
-    pub fn layout(&self, _start: StartPAddr) -> Result<Layout<'a>> {
-        unimplemented!()
-    }
 }
 
 impl<'a> Layout<'a> {

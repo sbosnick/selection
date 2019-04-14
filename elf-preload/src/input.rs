@@ -14,7 +14,7 @@ use crate::{Layout, StartPAddr, Result, Error};
 ///
 /// The constraints that the input ELF file must satisfy are:
 /// * it must be an executable ELF file (not a shared library)
-/// * it must not contain neither a dynamic array nor an interpreter reference
+/// * it must contain neither a dynamic array nor an interpreter reference
 #[derive(Debug)]
 pub struct Input<'a> {
     elf: Elf<'a>,

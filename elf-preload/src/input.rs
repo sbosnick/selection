@@ -11,6 +11,10 @@ use goblin::container::Ctx;
 use crate::{Layout, StartPAddr, Result, Error};
 
 /// An input ELF file that satisfies the necessary constraints for direct loading.
+///
+/// The constraints that the input ELF file must satisfy are:
+/// * it must be an executable ELF file (not a shared library)
+/// * it must not contain neither a dynamic array nor an interpreter reference
 #[derive(Debug)]
 pub struct Input<'a> {
     elf: Elf<'a>,
@@ -18,6 +22,11 @@ pub struct Input<'a> {
 
 impl<'a> Input<'a> {
     /// Create a new `Input` from the given input bytes.
+    ///
+    /// # Errors
+    /// `new()` can return the following errors:
+    /// * `Error::BadElf`: `input` is not an ELF file
+    /// * `Error::InvalidElf`: `input` does not satisfy the required constraints
     pub fn new(input: &'a [u8]) -> Result<Self> {
         let elf = Elf::parse(input)?;
         verify(&elf)?;

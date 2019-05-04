@@ -10,10 +10,12 @@ use goblin::elf::{program_header, Header, ProgramHeader};
 use goblin::container::Ctx;
 use crate::{Arch, OutputWriter, PAGE_SIZE, Result};
 
-/// The strategy to use for picking the starting physical address for the segments
-/// of the output file.
+/// The strategy to use for laying out the output ELF file.
+///
+/// The stategy is mainly concerned with assigning the physical addresses for
+/// the segments of the output file.
 #[derive(Debug, PartialEq)]
-pub enum StartPAddr {
+pub enum LayoutStrategy {
     /// The starting physical address is selected so as to maintain the physical
     /// addresses of the existing segments from the input file.
     FromInput,
@@ -22,12 +24,12 @@ pub enum StartPAddr {
     Specified(u64),
 }
 
-impl StartPAddr {
+impl LayoutStrategy {
     fn layout<'a, I>(&self, input: I, ctx: Ctx) -> Vec<ProgramHeader> 
     where
         I: ExactSizeIterator<Item = &'a ProgramHeader>,
     {
-        use StartPAddr::{FromInput, Specified};
+        use LayoutStrategy::{FromInput, Specified};
         let count = input.len() + 2;
         let mut phdrs = Vec::with_capacity(count);
 
@@ -170,7 +172,7 @@ pub struct Layout<'a> {
 }
 
 impl<'a> Layout<'a> {
-    pub (crate) fn new<'b, I>(arch: Arch, phdr: I, input: &'a [u8], start: StartPAddr) -> Self
+    pub (crate) fn new<'b, I>(arch: Arch, phdr: I, input: &'a [u8], start: LayoutStrategy) -> Self
     where
         I: ExactSizeIterator<Item = &'b ProgramHeader>
     {
@@ -214,7 +216,7 @@ mod test {
                             ..ProgramHeader::new() },
         ];
 
-        let sut = Layout::new(arch, phdr.iter(), &[], StartPAddr::Specified(0));
+        let sut = Layout::new(arch, phdr.iter(), &[], LayoutStrategy::Specified(0));
         let size = sut.required_size();
 
         assert_eq!(size, PAGE_SIZE + (offset as usize) + (memsz as usize));

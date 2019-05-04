@@ -8,7 +8,7 @@
 
 use itertools::Itertools;
 use goblin::elf::{Elf, ProgramHeader, header, program_header};
-use crate::{Arch, Layout, PAGE_SIZE, StartPAddr, Result, Error};
+use crate::{Arch, Layout, PAGE_SIZE, LayoutStrategy, Result, Error};
 
 /// An input ELF file that satisfies the necessary constraints for direct loading.
 ///
@@ -48,8 +48,8 @@ impl<'a> Input<'a> {
     /// `layout()` can return the following errors:
     /// * `Error::InvalidElf`: `start` is `FromInput` and the input contains sparse
     ///     segments with large gaps between their physical addresses
-    pub fn layout(&'a self, start: StartPAddr) -> Result<Layout<'a>> {
-        if start == StartPAddr::FromInput {
+    pub fn layout(&'a self, start: LayoutStrategy) -> Result<Layout<'a>> {
+        if start == LayoutStrategy::FromInput {
             verify_dense_segments(self.phdr.iter())?;
             verify_first_segment_not_near_zero(self.phdr.iter())?;
         }
@@ -269,7 +269,7 @@ mod test {
         buffer.gwrite(hello, &mut offset).unwrap();
 
         let input = Input::new(&buffer).expect("Invalid ELF file passed to Input::new()");
-        let result = input.layout(StartPAddr::FromInput);
+        let result = input.layout(LayoutStrategy::FromInput);
 
         assert_matches!(result, Err(Error::InvalidElf{message: _}));
     }
@@ -295,7 +295,7 @@ mod test {
         buffer.gwrite(hello, &mut offset).unwrap();
 
         let input = Input::new(&buffer).expect("Invalid ELF file passed to Input::new()");
-        let result = input.layout(StartPAddr::FromInput);
+        let result = input.layout(LayoutStrategy::FromInput);
 
         assert_matches!(result, Err(Error::InvalidElf{message: _}));
     }

@@ -44,7 +44,7 @@ mod arch;
 pub use arch::Arch;
 pub use error::{BadElfError, Error, Result};
 pub use input::Input;
-pub use layout::{Layout, StartPAddr};
+pub use layout::{Layout, LayoutStrategy};
 
 const PAGE_SIZE: usize = 4096;
 

@@ -6,9 +6,9 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms
 
-use goblin::elf::{Elf, header::{self, Header}, program_header::{self, ProgramHeader}};
-use goblin::container::Ctx;
-use crate::{Layout, StartPAddr, Result, Error};
+use itertools::Itertools;
+use goblin::elf::{Elf, ProgramHeader, header, program_header};
+use crate::{Arch, Layout, PAGE_SIZE, StartPAddr, Result, Error};
 
 /// An input ELF file that satisfies the necessary constraints for direct loading.
 ///
@@ -17,7 +17,9 @@ use crate::{Layout, StartPAddr, Result, Error};
 /// * it must contain neither a dynamic array nor an interpreter reference
 #[derive(Debug)]
 pub struct Input<'a> {
-    elf: Elf<'a>,
+    arch: Arch,
+    phdr: Vec<ProgramHeader>,
+    input: &'a [u8],
 }
 
 impl<'a> Input<'a> {
@@ -29,34 +31,37 @@ impl<'a> Input<'a> {
     /// * `Error::InvalidElf`: `input` does not satisfy the required constraints
     pub fn new(input: &'a [u8]) -> Result<Self> {
         let elf = Elf::parse(input)?;
+        let arch = Arch::new(&elf.header)?;
         verify(&elf)?;
 
-        Ok(Input{elf})
-    }
-
-    /// The size of the output ELF file corresponding to this input ELF file.
-    pub fn output_size(&self) -> usize {
-        let ctx = get_ctx(&self.elf);
-
-        // The ELF header and the PT_PHDR ProgramHeader
-        let header_sz = Header::size(&ctx) + ProgramHeader::size(&ctx);
-
-        println!("program headers: {:?}", self.elf.program_headers);
-
-        // The ProgramHeader and the segment contents for each loadable segment
-        let loadable_sz: usize = self.elf.program_headers.iter()
-            .filter(|ph| ph.p_type == program_header::PT_LOAD)
-            .map(|ph| ProgramHeader::size(&ctx) + ph.p_memsz as usize)
-            .sum();
-
-        header_sz + loadable_sz
+        Ok(Input{
+            arch,
+            phdr: sort_loadable_headers(elf.program_headers).collect(),
+            input,
+        })
     }
 
     /// Layout the output file using the given strategy for selecting the
     /// starting physical address.
-    pub fn layout(&self, _start: StartPAddr) -> Result<Layout<'a>> {
-        unimplemented!()
+    ///
+    /// # Errors
+    /// `layout()` can return the following errors:
+    /// * `Error::InvalidElf`: `start` is `FromInput` and the input contains sparse
+    ///     segments with large gaps between their physical addresses
+    pub fn layout(&'a self, start: StartPAddr) -> Result<Layout<'a>> {
+        if start == StartPAddr::FromInput {
+            verify_dense_segments(self.phdr.iter())?;
+            verify_first_segment_not_near_zero(self.phdr.iter())?;
+        }
+
+        Ok(Layout::new(self.arch, self.phdr.iter(), self.input, start))
     }
+}
+
+fn sort_loadable_headers(phdr: impl IntoIterator<Item = ProgramHeader>) -> impl Iterator<Item = ProgramHeader> {
+    phdr.into_iter()
+        .filter(|ph| ph.p_type == program_header::PT_LOAD)
+        .sorted_by_key(|ph| (ph.p_paddr, ph.p_vaddr))
 }
 
 fn verify(elf: &Elf) -> Result<()> {
@@ -75,13 +80,30 @@ fn verify(elf: &Elf) -> Result<()> {
     message.map_or(Ok(()), |message| Err(InvalidElf{message: message.to_owned()}))
 }
 
-fn get_ctx<'a>(elf: &Elf<'a>) -> Ctx {
-    use goblin::container::{Container, Endian};
+fn verify_dense_segments<'a>(phdr: impl Iterator<Item = &'a ProgramHeader>) -> Result<()> {
+    let max_segment_gap = phdr.tuple_windows::<(_,_)>()
+        .map(|(ph1, ph2)| ph2.p_paddr - (ph1.p_paddr + ph1.p_memsz))
+        .max();
 
-    let container = if elf.is_64 { Container::Big } else { Container::Little };
-    let endian = if !elf.little_endian { Endian::Big } else { Endian::Little };
+    match max_segment_gap {
+        Some(max) if max as usize > PAGE_SIZE => {
+            let message = "ELF file segments are sparse with large gaps in their physical layout";
+            Err(Error::InvalidElf{message: message.to_owned()})
+        }
+        _ => Ok(())
+    }
+}
 
-    Ctx::new(container, endian)
+fn verify_first_segment_not_near_zero<'a>(phdr: impl Iterator<Item = &'a ProgramHeader>) -> Result<()> {
+    let min_paddr = phdr.map(|ph| ph.p_paddr).min();
+
+    match min_paddr {
+        Some(min) if (min as usize) < PAGE_SIZE => {
+            let message = "ELF file's first segment physical address does not leave room for headers";
+            Err(Error::InvalidElf{message: message.to_owned()})
+        }
+        _ => Ok(())
+    }
 }
 
 #[cfg(test)]
@@ -89,6 +111,7 @@ mod test {
     use super::*;
     use std::ffi::CString;
     use crate::Error;
+    use goblin::container::Ctx;
     use goblin::elf::header::{self, Header};
     use goblin::elf::program_header::{self, ProgramHeader};
     use goblin::elf::r#dyn as dynamic;
@@ -207,7 +230,7 @@ mod test {
                 ..ProgramHeader::new()
             },
             &mut offset, ctx).unwrap();
-        input.gwrite(CString::new("Hello World!").expect("Bad CString"), &mut offset).unwrap();
+        input.gwrite(hello, &mut offset).unwrap();
 
         let result = Input::new(&input);
 
@@ -215,26 +238,66 @@ mod test {
     }
 
     #[test]
-    fn input_with_one_loadable_segment_has_expected_output_size() {
-        let memsz: usize = 200;
-        let mut buffer = vec![0; 512];
+    fn input_layout_with_from_input_start_and_sparse_segements_is_error() {
+        let hello = CString::new("Hello World!").expect("Bad CString");
+        let hello_len = hello.as_bytes_with_nul().len();
+        let mut buffer = vec![0; 4*PAGE_SIZE];
         let ctx = get_ctx();
         let mut offset: usize = 0;
-        write_header(&ctx, &mut buffer, &mut offset, 1);
+        write_header(&ctx, &mut buffer, &mut offset, 2);
+        buffer.gwrite_with(
+            ProgramHeader {
+                p_offset: (Header::size(&ctx) + 2*ProgramHeader::size(&ctx)) as u64,
+                p_vaddr: 0x1000,
+                p_paddr: 0x4000,
+                p_filesz: hello_len as u64,
+                p_memsz: 100,
+                ..ProgramHeader::new()
+            },
+            &mut offset, ctx).unwrap();
+        buffer.gwrite_with(
+            ProgramHeader {
+                p_offset: (Header::size(&ctx) + 2*ProgramHeader::size(&ctx) + hello_len) as u64,
+                p_vaddr: 0x1000 + 2 * PAGE_SIZE as u64,
+                p_paddr: 0x4000 + 2 * PAGE_SIZE as u64,
+                p_filesz: hello_len as u64,
+                p_memsz: 100,
+                ..ProgramHeader::new()
+            },
+            &mut offset, ctx).unwrap();
+        buffer.gwrite(hello.clone(), &mut offset).unwrap();
+        buffer.gwrite(hello, &mut offset).unwrap();
+
+        let input = Input::new(&buffer).expect("Invalid ELF file passed to Input::new()");
+        let result = input.layout(StartPAddr::FromInput);
+
+        assert_matches!(result, Err(Error::InvalidElf{message: _}));
+    }
+
+    #[test]
+    fn input_layout_with_from_input_start_and_first_segment_near_zero_is_error() {
+        let hello = CString::new("Hello World!").expect("Bad CString");
+        let hello_len = hello.as_bytes_with_nul().len();
+        let mut buffer = vec![0; 4*PAGE_SIZE];
+        let ctx = get_ctx();
+        let mut offset: usize = 0;
+        write_header(&ctx, &mut buffer, &mut offset, 2);
         buffer.gwrite_with(
             ProgramHeader {
                 p_offset: (Header::size(&ctx) + ProgramHeader::size(&ctx)) as u64,
                 p_vaddr: 0x1000,
-                p_filesz: 100,
-                p_memsz: memsz as u64,
+                p_paddr: 0x0010,
+                p_filesz: hello_len as u64,
+                p_memsz: 100,
                 ..ProgramHeader::new()
             },
             &mut offset, ctx).unwrap();
-        buffer.gwrite(CString::new("Hello World!").expect("Bad CString"), &mut offset).unwrap();
+        buffer.gwrite(hello, &mut offset).unwrap();
 
-        let input = Input::new(&buffer).expect("Invalid Elf passed ot Input::new()");
+        let input = Input::new(&buffer).expect("Invalid ELF file passed to Input::new()");
+        let result = input.layout(StartPAddr::FromInput);
 
-        assert_eq!(input.output_size(), Header::size(&ctx) + 2*ProgramHeader::size(&ctx) + memsz);
+        assert_matches!(result, Err(Error::InvalidElf{message: _}));
     }
 
     fn get_ctx() -> Ctx {

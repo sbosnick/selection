@@ -38,46 +38,24 @@ extern crate assert_matches;
 
 mod error;
 mod input;
+mod layout;
+mod arch;
 
-pub use input::Input;
+pub use arch::Arch;
 pub use error::{BadElfError, Error, Result};
+pub use input::Input;
+pub use layout::{Layout, StartPAddr};
+
+const PAGE_SIZE: usize = 4096;
 
 use std::marker::PhantomData;
 
-/// The layout of the output file. Created by the [`layout`][Input::layout] method.
-pub struct Layout<'a> {
-    _phantom: PhantomData<&'a u8>,
-}
 
 /// A potentially parallelizable writer for the output file. Created by the
 /// [`output`][Layout::output] method.
 pub struct OutputWriter<'a, 'b> {
     _phantoma: PhantomData<&'a u8>,
     _phantomb: PhantomData<&'b u8>,
-}
-
-/// The strategy to use for picking the starting physical address for the segments
-/// of the output file.
-pub enum StartPAddr {
-    /// The starting physical address is selected so as to maintain the physical
-    /// addresses of the existing segments from the input file.
-    FromInput,
-
-    /// The starting physical address is set to the specified physical address.
-    Specified(u64),
-}
-
-impl<'a> Layout<'a> {
-    /// The required size of the output represented by this layout.
-    pub fn required_size(&self) -> usize {
-        unimplemented!()
-    }
-
-    /// Prepare to write to the given output bytes, which must be at least
-    /// [`required_size`][Layout::required_size] in length.
-    pub fn output<'b>(&'a self, _output: &'b mut [u8]) -> Result<OutputWriter<'a,'b>> {
-        unimplemented!()
-    }
 }
 
 impl<'a, 'b> OutputWriter<'a, 'b> {

@@ -27,6 +27,11 @@ pub enum LayoutStrategy {
 }
 
 impl LayoutStrategy {
+    /// Tranforms the input program headers into the output program hearders
+    /// in accorance with the given LayoutStrategy.
+    ///
+    /// The input program headers should be sorted by p_paddr and then by
+    /// p_vaddr.
     pub (super) fn layout<'a, I>(&self, input: I, ctx: Ctx) -> Vec<ProgramHeader> 
     where
         I: ExactSizeIterator<Item = &'a ProgramHeader>,

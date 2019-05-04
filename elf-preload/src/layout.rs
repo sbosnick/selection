@@ -20,8 +20,10 @@ pub enum LayoutStrategy {
     /// addresses of the existing segments from the input file.
     FromInput,
 
-    /// The starting physical address is set to the specified physical address.
-    Specified(u64),
+    /// The starting physical address is set to the specified physical address and
+    /// later the subsequent physical addresses are set to exactly follow the end
+    /// of the previous segment.
+    SpecifiedStart(u64),
 }
 
 impl LayoutStrategy {
@@ -29,12 +31,12 @@ impl LayoutStrategy {
     where
         I: ExactSizeIterator<Item = &'a ProgramHeader>,
     {
-        use LayoutStrategy::{FromInput, Specified};
+        use LayoutStrategy::{FromInput, SpecifiedStart};
         let count = input.len() + 2;
         let mut phdrs = Vec::with_capacity(count);
 
         match self {
-            Specified(start) => {
+            SpecifiedStart(start) => {
                 phdrs.push(create_phdr_header(*start, count, ctx));
                 phdrs.push(create_first_load_header(*start, count, ctx));
 
@@ -216,7 +218,7 @@ mod test {
                             ..ProgramHeader::new() },
         ];
 
-        let sut = Layout::new(arch, phdr.iter(), &[], LayoutStrategy::Specified(0));
+        let sut = Layout::new(arch, phdr.iter(), &[], LayoutStrategy::SpecifiedStart(0));
         let size = sut.required_size();
 
         assert_eq!(size, PAGE_SIZE + (offset as usize) + (memsz as usize));

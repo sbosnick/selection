@@ -32,6 +32,11 @@ impl LayoutStrategy {
     ///
     /// The input program headers should be sorted by p_paddr and then by
     /// p_vaddr.
+    // #SPC-elfpreload.ptphdr
+    // #SPC-elfpreload.ptload
+    // #SPC-elfpreload.nobss
+    // #SPC-elfpreload.paddr
+    // #SPC-elfpreload.plenum
     pub (super) fn layout<'a, I>(&self, input: I, ctx: Ctx) -> Vec<ProgramHeader> 
     where
         I: ExactSizeIterator<Item = &'a ProgramHeader>,

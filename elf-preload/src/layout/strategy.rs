@@ -181,6 +181,7 @@ mod test {
         let sut = LayoutStrategy::SpecifiedStart(100);
         let out = sut.layout(phdr.iter(), new_ctx());
 
+        // out[1] is the first PT_LOAD segment
         assert!(out[1].p_filesz >= PAGE_SIZE as u64);
     }
 
@@ -191,6 +192,7 @@ mod test {
         let sut = LayoutStrategy::SpecifiedStart(100);
         let out = sut.layout(phdr.iter(), new_ctx());
 
+        // out[1] is the first PT_LOAD segment
         assert!(out[1].p_filesz < PAGE_SIZE as u64);
     }
 

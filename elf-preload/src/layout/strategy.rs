@@ -49,7 +49,8 @@ impl LayoutStrategy {
                 let mut offset = first_load_header_size(count, ctx);
                 let mut paddr = start + offset;
                 for phdr in input {
-                    align_offset_and_paddr(&mut offset, &mut paddr, phdr.p_vaddr, phdr.p_align);
+                    paddr += align_adjustment(offset, phdr.p_vaddr, phdr.p_align);
+                    offset += align_adjustment(offset, phdr.p_vaddr, phdr.p_align);
                     extend_load_header_size(phdrs.last_mut(), offset);
                     phdrs.push(create_subsequent_load_header(offset, paddr, phdr));
                     offset += phdr.p_memsz;
@@ -57,10 +58,30 @@ impl LayoutStrategy {
                     min_vaddr = min_vaddr.min(phdr.p_vaddr);
                 }
                 
-                adjust_phdr_header(&mut phdrs[0], min_vaddr, count, ctx);
-                adjust_first_load_header(&mut phdrs[1], min_vaddr, count, ctx);
+                adjust_phdr_header(&mut phdrs[0], min_vaddr, count, ctx, None);
+                adjust_first_load_header(&mut phdrs[1], min_vaddr, count, ctx, None);
             }
-            FromInput => unimplemented!(),
+
+            FromInput => {
+                phdrs.push(create_phdr_header(0, count, ctx));
+                phdrs.push(create_first_load_header(0, count, ctx));
+
+                let mut min_vaddr = u64::max_value();
+                let mut min_paddr = u64::max_value();
+                let mut offset = first_load_header_size(count, ctx);
+                for phdr in input {
+                    offset += align_adjustment(offset, phdr.p_vaddr, phdr.p_align);
+                    extend_load_header_size(phdrs.last_mut(), offset);
+                    phdrs.push(create_subsequent_load_header(offset, phdr.p_paddr, phdr));
+                    offset += phdr.p_memsz;
+                    min_vaddr = min_vaddr.min(phdr.p_vaddr);
+                    min_paddr = min_paddr.min(phdr.p_paddr);
+                }
+
+                let paddr_adjust = min_paddr - phdrs[1].p_memsz;
+                adjust_phdr_header(&mut phdrs[0], min_vaddr, count, ctx, Some(paddr_adjust));
+                adjust_first_load_header(&mut phdrs[1], min_vaddr, count, ctx, Some(paddr_adjust));
+            }
         }
 
         phdrs
@@ -86,13 +107,23 @@ fn create_phdr_header(start_paddr: u64, count: usize, ctx: Ctx) -> ProgramHeader
     phdr
 }
 
-fn adjust_phdr_header(phdr: &mut ProgramHeader, lowest_vaddr: u64, count: usize, ctx: Ctx) {
+fn adjust_phdr_header(
+    phdr: &mut ProgramHeader, 
+    lowest_vaddr: u64, 
+    count: usize, 
+    ctx: Ctx, 
+    paddr_adjust: Option<u64>,
+) {
     let vaddr = align_down(lowest_vaddr - program_header_size(count, ctx), phdr.p_offset, phdr.p_align);
 
     debug_assert!(phdr.p_type == program_header::PT_PHDR);
     debug_assert!(phdr.p_offset % phdr.p_align == vaddr % phdr.p_align);
 
     phdr.p_vaddr = vaddr;
+    match paddr_adjust {
+        Some(adjust) => phdr.p_paddr += adjust,
+        None => {}
+    }
 }
 
 fn create_first_load_header(start_paddr: u64, count: usize, ctx: Ctx) -> ProgramHeader {
@@ -112,13 +143,23 @@ fn create_first_load_header(start_paddr: u64, count: usize, ctx: Ctx) -> Program
     load
 }
 
-fn adjust_first_load_header(load: &mut ProgramHeader, lowest_vaddr: u64, count: usize, ctx: Ctx) {
+fn adjust_first_load_header(
+    load: &mut ProgramHeader, 
+    lowest_vaddr: u64,
+    count: usize,
+    ctx: Ctx,
+    paddr_adjust: Option<u64>,
+) {
     let vaddr = align_down(lowest_vaddr - first_load_header_size(count, ctx), load.p_offset, load.p_align);
 
     debug_assert!(load.p_type == program_header::PT_LOAD);
     debug_assert!(load.p_offset % load.p_align == vaddr % load.p_align);
 
     load.p_vaddr = vaddr;
+    match paddr_adjust {
+        Some(adjust) => load.p_paddr += adjust,
+        None => {}
+    }
 }
 
 fn create_subsequent_load_header(offset: u64, paddr: u64, input: &ProgramHeader) -> ProgramHeader {
@@ -143,22 +184,12 @@ fn extend_load_header_size(load: Option<&mut ProgramHeader>, next_offset: u64) {
     });
 }
 
-fn align_offset_and_paddr(offset: &mut u64, paddr: &mut u64, vaddr: u64, align: u64) {
-    let aoffset = *offset % align;
-    let avaddr = vaddr % align;
-
-    let adjustment = if aoffset > avaddr {
-        (avaddr + align) - aoffset
-    } else {
-        avaddr - aoffset
-    };
-
-    *offset += adjustment;
-    *paddr += adjustment;
+fn align_adjustment(input: u64, reference: u64, align: u64) -> u64 {
+    (input.max(reference) - input.min(reference)) % align
 }
 
 fn align_down(input: u64, reference: u64, align: u64) -> u64 {
-    input - ((input.max(reference) - input.min(reference)) % align)
+    input - align_adjustment(input, reference, align)
 }
 
 fn first_load_header_size(count: usize, ctx: Ctx) -> u64 {
@@ -249,6 +280,7 @@ mod test {
             } else {
                 // the next PT_LOAD segment is exactly after the current one
                 assert_eq!(l.p_paddr + l.p_filesz, r.p_paddr);
+                assert_eq!(l.p_offset + l.p_filesz, r.p_offset);
             }
         }
     }
@@ -264,6 +296,78 @@ mod test {
         assert_eq!(out[1].p_paddr, start);
     }
 
+    #[test]
+    fn from_input_layout_gives_phdr_and_load_segments() {
+        let phdr = vec![make_paddr_phdr(100, 100, 5200), make_paddr_phdr(1200, 50, 5500)];
+
+        let sut = LayoutStrategy::FromInput;
+        let out = sut.layout(phdr.iter(), new_ctx());
+
+        assert_eq!(out.len(), 4);
+        assert_eq!(out[0].p_type, program_header::PT_PHDR);
+        assert_eq!(out[1].p_type, program_header::PT_LOAD);
+        assert_eq!(out[2].p_type, program_header::PT_LOAD);
+        assert_eq!(out[3].p_type, program_header::PT_LOAD);
+    }
+
+    #[test]
+    fn from_input_layout_gives_full_filesz_segments() {
+        let phdr = vec![make_paddr_phdr(100, 100, 5200), make_paddr_phdr(1200, 50, 5500)];
+
+        let sut = LayoutStrategy::FromInput;
+        let out = sut.layout(phdr.iter(), new_ctx());
+
+        for ph in out {
+            assert_eq!(ph.p_memsz, ph.p_filesz);
+        }
+    }
+
+    #[test]
+    fn from_input_layout_gives_sorted_segments() {
+        let phdr = vec![make_paddr_phdr(100, 100, 5200), make_paddr_phdr(1200, 50, 5500)];
+
+        let sut = LayoutStrategy::FromInput;
+        let out = sut.layout(phdr.iter(), new_ctx());
+
+        for (l,r) in out.iter().tuple_windows() {
+            assert!(l.p_type != program_header::PT_LOAD || l.p_vaddr <= r.p_vaddr);
+        }
+    }
+
+    #[test]
+    fn from_input_layout_gives_plenum() {
+        let phdr = vec![make_paddr_phdr(100, 100, 5200), make_paddr_phdr(1200, 50, 5500)];
+
+        let sut = LayoutStrategy::FromInput;
+        let out = sut.layout(phdr.iter(), new_ctx());
+
+        for (l,r) in out.iter().tuple_windows() {
+            if l.p_type == program_header::PT_PHDR {
+                // The PT_PHDR is within the first PT_LOAD segment.
+                assert!(l.p_paddr >= r.p_paddr);
+                assert!(l.p_paddr + l.p_filesz <= r.p_paddr + r.p_filesz);
+            } else {
+                // The next PT_LOAD segment is exactly after the current one.
+                // This does not check the p_paddr for a plenum constraint since
+                // this strategy does not assign the p_paddr.
+                assert_eq!(l.p_offset + l.p_filesz, r.p_offset);
+            }
+        }
+    }
+
+    #[test]
+    fn from_input_layout_gives_paddr_from_input() {
+        let paddr1 = 5200;
+        let paddr2 = 5500;
+        let phdr = vec![make_paddr_phdr(100, 100, paddr1), make_paddr_phdr(1200, 50, paddr2)];
+
+        let sut = LayoutStrategy::FromInput;
+        let out = sut.layout(phdr.iter(), new_ctx());
+
+        assert_eq!(out[2].p_paddr, paddr1);
+        assert_eq!(out[3].p_paddr, paddr2);
+    }
+
     fn new_ctx() -> Ctx {
         use goblin::container::{Container, Endian};
 
@@ -277,6 +381,13 @@ mod test {
             p_vaddr: rel_offset + 4*PAGE_SIZE as u64,
             p_offset: rel_offset + 1*PAGE_SIZE as u64,
             ..ProgramHeader::new()
+        }
+    }
+
+    fn make_paddr_phdr(rel_offset: u64, memsz: u64, paddr: u64) -> ProgramHeader {
+        ProgramHeader {
+            p_paddr: paddr,
+            ..make_phdr(rel_offset, memsz)
         }
     }
 }

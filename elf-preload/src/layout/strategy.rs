@@ -168,3 +168,113 @@ fn first_load_header_size(count: usize, ctx: Ctx) -> u64 {
 fn program_header_size(count: usize, ctx: Ctx) -> u64 {
     ((count + 2) * ProgramHeader::size(&ctx)) as u64
 }
+
+#[cfg(test)]
+mod test {
+    use super::*;
+    use itertools::Itertools;
+
+    #[test]
+    fn specified_start_layout_without_room_gives_gt_page_size_first_segment() {
+        let phdr = vec![make_phdr(25, 100)];
+
+        let sut = LayoutStrategy::SpecifiedStart(100);
+        let out = sut.layout(phdr.iter(), new_ctx());
+
+        assert!(out[1].p_filesz >= PAGE_SIZE as u64);
+    }
+
+    #[test]
+    fn specified_start_layout_with_room_gives_lt_page_size_first_segment() {
+        let phdr = vec![make_phdr(1000, 100)];
+
+        let sut = LayoutStrategy::SpecifiedStart(100);
+        let out = sut.layout(phdr.iter(), new_ctx());
+
+        assert!(out[1].p_filesz < PAGE_SIZE as u64);
+    }
+
+    #[test]
+    fn specified_start_layout_gives_phdr_and_load_segments() {
+        let phdr = vec![make_phdr(1000, 100), make_phdr(1200,50)];
+
+        let sut = LayoutStrategy::SpecifiedStart(100);
+        let out = sut.layout(phdr.iter(), new_ctx());
+
+        assert_eq!(out.len(), 4);
+        assert_eq!(out[0].p_type, program_header::PT_PHDR);
+        assert_eq!(out[1].p_type, program_header::PT_LOAD);
+        assert_eq!(out[2].p_type, program_header::PT_LOAD);
+        assert_eq!(out[3].p_type, program_header::PT_LOAD);
+    }
+
+    #[test]
+    fn specified_start_layout_gives_full_filesz_segments() {
+        let phdr = vec![make_phdr(1000, 100), make_phdr(1200,50)];
+
+        let sut = LayoutStrategy::SpecifiedStart(100);
+        let out = sut.layout(phdr.iter(), new_ctx());
+
+        for ph in out {
+            assert_eq!(ph.p_memsz, ph.p_filesz);
+        }
+    }
+
+    #[test]
+    fn specified_start_layout_gives_sorted_segments() {
+        let phdr = vec![make_phdr(1000, 100), make_phdr(1200,50)];
+
+        let sut = LayoutStrategy::SpecifiedStart(100);
+        let out = sut.layout(phdr.iter(), new_ctx());
+
+        for (l,r) in out.iter().tuple_windows() {
+            assert!(l.p_type != program_header::PT_LOAD || l.p_vaddr <= r.p_vaddr);
+        }
+    }
+
+    #[test]
+    fn specified_start_layout_gives_plenum() {
+        let phdr = vec![make_phdr(1000, 100), make_phdr(1200,50)];
+
+        let sut = LayoutStrategy::SpecifiedStart(100);
+        let out = sut.layout(phdr.iter(), new_ctx());
+
+        for (l,r) in out.iter().tuple_windows() {
+            if l.p_type == program_header::PT_PHDR {
+                // the PT_PHDR is within the first PT_LOAD segment
+                assert!(l.p_paddr >= r.p_paddr);
+                assert!(l.p_paddr + l.p_filesz <= r.p_paddr + r.p_filesz);
+            } else {
+                // the next PT_LOAD segment is exactly after the current one
+                assert_eq!(l.p_paddr + l.p_filesz, r.p_paddr);
+            }
+        }
+    }
+
+    #[test]
+    fn specified_start_layout_gives_specified_start() {
+        let phdr = vec![make_phdr(1000, 100), make_phdr(1200,50)];
+        let start = 100;
+
+        let sut = LayoutStrategy::SpecifiedStart(start);
+        let out = sut.layout(phdr.iter(), new_ctx());
+
+        assert_eq!(out[1].p_paddr, start);
+    }
+
+    fn new_ctx() -> Ctx {
+        use goblin::container::{Container, Endian};
+
+        Ctx::new(Container::Big, Endian::Big)
+    }
+
+    fn make_phdr(rel_offset: u64, memsz: u64) -> ProgramHeader {
+        ProgramHeader {
+            p_memsz: memsz,
+            p_align: PAGE_SIZE as u64,
+            p_vaddr: rel_offset + 4*PAGE_SIZE as u64,
+            p_offset: rel_offset + 1*PAGE_SIZE as u64,
+            ..ProgramHeader::new()
+        }
+    }
+}

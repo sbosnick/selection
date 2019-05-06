@@ -19,8 +19,11 @@ pub enum Error {
     BadElf(#[cause] BadElfError),
 
     /// The input ELF file has failed a constraint validation
-    #[fail(display = "The input ELF file does not satisfy a required constraint: {}", message)]
-    InvalidElf{message: String},
+    #[fail(
+        display = "The input ELF file does not satisfy a required constraint: {}",
+        message
+    )]
+    InvalidElf { message: String },
 }
 
 #[doc(hidden)]

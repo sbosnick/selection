@@ -83,7 +83,7 @@ pub enum Platform {
     Tx1,
 
     /// The Tx2 platform
-    Tx2, 
+    Tx2,
 }
 
 impl CMakeTarget {
@@ -222,14 +222,24 @@ impl Platform {
 }
 
 trait CmakeExt {
-    fn set_arch_and_platform(&mut self, arch: Arch, target: &CMakeTarget, class: BuildClass) -> &mut Self;
+    fn set_arch_and_platform(
+        &mut self,
+        arch: Arch,
+        target: &CMakeTarget,
+        class: BuildClass,
+    ) -> &mut Self;
     fn set_profile(&mut self, profile: Profile, arch: Arch) -> &mut Self;
     fn set_cmake_target(&mut self, target: &CMakeTarget) -> &mut Self;
     fn set_build_class(&mut self, class: BuildClass, arch: Arch) -> &mut Self;
 }
 
 impl CmakeExt for cmake::Config {
-    fn set_arch_and_platform(&mut self, arch: Arch, target: &CMakeTarget, class: BuildClass) -> &mut Self {
+    fn set_arch_and_platform(
+        &mut self,
+        arch: Arch,
+        target: &CMakeTarget,
+        class: BuildClass,
+    ) -> &mut Self {
         use self::CMakeTarget::Kernel;
         use self::Platform::*;
 
@@ -293,21 +303,20 @@ impl CmakeExt for cmake::Config {
 
     // Implements #SPC-sel4platcrate.class
     fn set_build_class(&mut self, class: BuildClass, arch: Arch) -> &mut Self {
-        // Note: the settings for BuildClass::Verified are based on the non-ABI 
-        // settings from the ARM_verified.cmake and X64_verfied.cmake files in 
+        // Note: the settings for BuildClass::Verified are based on the non-ABI
+        // settings from the ARM_verified.cmake and X64_verfied.cmake files in
         // the configs directory of the seL4 repository. Settings that match
         // the default setting are not redundantly re-set. Also, those .cmake
         // files include a setting for 'KernelMaxNumBootinfoUntypedCap' (without
-        // the trailing 's') which does not appear to be a real setting. That 
+        // the trailing 's') which does not appear to be a real setting. That
         // setting is not included here.
 
-        use self::BuildClass::{Default, Verified};
         use self::Arch::X86_64;
+        use self::BuildClass::{Default, Verified};
 
         let result = match class {
             Default => self,
-            Verified => self
-                .define("KernelNumDomains", "16")
+            Verified => self.define("KernelNumDomains", "16"),
         };
 
         match (class, arch) {

@@ -8,18 +8,14 @@
 
 #![cfg(not(target_os = "none"))]
 
-use std::{
-    fs,
-    path::Path,
-};
+use std::{fs, path::Path};
 
 #[test]
 // Implements #TST-sel4platcrate
 fn kernel_elf_in_expected_location() {
     let out_dir = Path::new(env!("OUT_DIR"));
 
-    let metadata = fs::metadata(out_dir.join("kernel.elf"))
-        .expect("Unable to find kernel.elf");
+    let metadata = fs::metadata(out_dir.join("kernel.elf")).expect("Unable to find kernel.elf");
 
     if !metadata.is_file() {
         panic!("kernel.elf is not a file");

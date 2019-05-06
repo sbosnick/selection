@@ -9,7 +9,7 @@
 //! Library to convert ELF files into a form that is suitable for loading with
 //! [`std::ptr::copy_nonoverlapping`].
 //!
-//! In general an arbitrary ELF file cannot be loaded by copying its bytes to 
+//! In general an arbitrary ELF file cannot be loaded by copying its bytes to
 //! its expected load address. This library transforms ELF files that complies with
 //! certain constraints into ELF files that can be loaded by copying the entire
 //! contents of the file to the expected load address.
@@ -18,7 +18,7 @@
 //! `Input` is the parsed bytes of the input ELF file that have also passed some
 //! tests to ensure the input ELF file complies with the constraints. `Layout` is
 //! (as the name suggest) the layout of the output ELF file without having copied
-//! the bytes into that file. `OutputWriter` is a type that can write (part or 
+//! the bytes into that file. `OutputWriter` is a type that can write (part or
 //! all of) the output into the output file. It can also be split in two and
 //! each the resulting OutputWriter's can then write its own part of the output.
 //!
@@ -31,15 +31,14 @@
 // part blog post on linkers, and specifically from https://www.airs.com/blog/archives/47
 
 #[deny(missing_docs, unsafe_code)]
-
 #[cfg(test)]
 #[macro_use]
 extern crate assert_matches;
 
+mod arch;
 mod error;
 mod input;
 mod layout;
-mod arch;
 
 pub use arch::Arch;
 pub use error::{BadElfError, Error, Result};
@@ -49,7 +48,6 @@ pub use layout::{Layout, LayoutStrategy};
 const PAGE_SIZE: usize = 4096;
 
 use std::marker::PhantomData;
-
 
 /// A potentially parallelizable writer for the output file. Created by the
 /// [`output`][Layout::output] method.
@@ -62,7 +60,7 @@ impl<'a, 'b> OutputWriter<'a, 'b> {
     /// Potentially split this `OutputWriter` into two independent `OutputWriter`'s
     /// for separate parts of the output.
     ///
-    /// The signature of this function is intended to make it usable as the 
+    /// The signature of this function is intended to make it usable as the
     /// `splitter` argument to the [rayon][rayon] [split] function.
     ///
     /// [rayon]: https://crates.io/crates/rayon
@@ -72,7 +70,7 @@ impl<'a, 'b> OutputWriter<'a, 'b> {
     }
 
     /// Write the portion of the output represented by this `OutputWriter` to the
-    /// corresponding sub-slice of the output bytes passed to the 
+    /// corresponding sub-slice of the output bytes passed to the
     /// [`output`][Layout::output] method.
     pub fn write(&self) -> Result<()> {
         unimplemented!()

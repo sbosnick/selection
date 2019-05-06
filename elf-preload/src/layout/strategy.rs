@@ -6,9 +6,9 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms
 
-use goblin::elf::{program_header, Header, ProgramHeader};
-use goblin::container::Ctx;
 use crate::PAGE_SIZE;
+use goblin::container::Ctx;
+use goblin::elf::{program_header, Header, ProgramHeader};
 
 /// The strategy to use for laying out the output ELF file.
 ///
@@ -37,7 +37,7 @@ impl LayoutStrategy {
     // #SPC-elfpreload.nobss
     // #SPC-elfpreload.paddr
     // #SPC-elfpreload.plenum
-    pub (super) fn layout<'a, I>(&self, input: I, ctx: Ctx) -> Vec<ProgramHeader> 
+    pub(super) fn layout<'a, I>(&self, input: I, ctx: Ctx) -> Vec<ProgramHeader>
     where
         I: ExactSizeIterator<Item = &'a ProgramHeader>,
     {
@@ -62,7 +62,7 @@ impl LayoutStrategy {
                     paddr += phdr.p_memsz;
                     min_vaddr = min_vaddr.min(phdr.p_vaddr);
                 }
-                
+
                 adjust_phdr_header(&mut phdrs[0], min_vaddr, count, ctx, None);
                 adjust_first_load_header(&mut phdrs[1], min_vaddr, count, ctx, None);
             }
@@ -113,13 +113,17 @@ fn create_phdr_header(start_paddr: u64, count: usize, ctx: Ctx) -> ProgramHeader
 }
 
 fn adjust_phdr_header(
-    phdr: &mut ProgramHeader, 
-    lowest_vaddr: u64, 
-    count: usize, 
-    ctx: Ctx, 
+    phdr: &mut ProgramHeader,
+    lowest_vaddr: u64,
+    count: usize,
+    ctx: Ctx,
     paddr_adjust: Option<u64>,
 ) {
-    let vaddr = align_down(lowest_vaddr - program_header_size(count, ctx), phdr.p_offset, phdr.p_align);
+    let vaddr = align_down(
+        lowest_vaddr - program_header_size(count, ctx),
+        phdr.p_offset,
+        phdr.p_align,
+    );
 
     debug_assert!(phdr.p_type == program_header::PT_PHDR);
     debug_assert!(phdr.p_offset % phdr.p_align == vaddr % phdr.p_align);
@@ -149,13 +153,17 @@ fn create_first_load_header(start_paddr: u64, count: usize, ctx: Ctx) -> Program
 }
 
 fn adjust_first_load_header(
-    load: &mut ProgramHeader, 
+    load: &mut ProgramHeader,
     lowest_vaddr: u64,
     count: usize,
     ctx: Ctx,
     paddr_adjust: Option<u64>,
 ) {
-    let vaddr = align_down(lowest_vaddr - first_load_header_size(count, ctx), load.p_offset, load.p_align);
+    let vaddr = align_down(
+        lowest_vaddr - first_load_header_size(count, ctx),
+        load.p_offset,
+        load.p_align,
+    );
 
     debug_assert!(load.p_type == program_header::PT_LOAD);
     debug_assert!(load.p_offset % load.p_align == vaddr % load.p_align);
@@ -175,7 +183,7 @@ fn create_subsequent_load_header(offset: u64, paddr: u64, input: &ProgramHeader)
         p_offset: offset,
         p_paddr: paddr,
         p_vaddr: input.p_vaddr,
-        p_filesz: input.p_memsz,  // not a typo
+        p_filesz: input.p_memsz, // not a typo
         p_memsz: input.p_memsz,
         p_flags: input.p_flags,
         p_align: input.p_align,
@@ -234,7 +242,7 @@ mod test {
 
     #[test]
     fn specified_start_layout_gives_phdr_and_load_segments() {
-        let phdr = vec![make_phdr(1000, 100), make_phdr(1200,50)];
+        let phdr = vec![make_phdr(1000, 100), make_phdr(1200, 50)];
 
         let sut = LayoutStrategy::SpecifiedStart(100);
         let out = sut.layout(phdr.iter(), new_ctx());
@@ -248,7 +256,7 @@ mod test {
 
     #[test]
     fn specified_start_layout_gives_full_filesz_segments() {
-        let phdr = vec![make_phdr(1000, 100), make_phdr(1200,50)];
+        let phdr = vec![make_phdr(1000, 100), make_phdr(1200, 50)];
 
         let sut = LayoutStrategy::SpecifiedStart(100);
         let out = sut.layout(phdr.iter(), new_ctx());
@@ -260,24 +268,24 @@ mod test {
 
     #[test]
     fn specified_start_layout_gives_sorted_segments() {
-        let phdr = vec![make_phdr(1000, 100), make_phdr(1200,50)];
+        let phdr = vec![make_phdr(1000, 100), make_phdr(1200, 50)];
 
         let sut = LayoutStrategy::SpecifiedStart(100);
         let out = sut.layout(phdr.iter(), new_ctx());
 
-        for (l,r) in out.iter().tuple_windows() {
+        for (l, r) in out.iter().tuple_windows() {
             assert!(l.p_type != program_header::PT_LOAD || l.p_vaddr <= r.p_vaddr);
         }
     }
 
     #[test]
     fn specified_start_layout_gives_plenum() {
-        let phdr = vec![make_phdr(1000, 100), make_phdr(1200,50)];
+        let phdr = vec![make_phdr(1000, 100), make_phdr(1200, 50)];
 
         let sut = LayoutStrategy::SpecifiedStart(100);
         let out = sut.layout(phdr.iter(), new_ctx());
 
-        for (l,r) in out.iter().tuple_windows() {
+        for (l, r) in out.iter().tuple_windows() {
             if l.p_type == program_header::PT_PHDR {
                 // the PT_PHDR is within the first PT_LOAD segment
                 assert!(l.p_paddr >= r.p_paddr);
@@ -292,7 +300,7 @@ mod test {
 
     #[test]
     fn specified_start_layout_gives_specified_start() {
-        let phdr = vec![make_phdr(1000, 100), make_phdr(1200,50)];
+        let phdr = vec![make_phdr(1000, 100), make_phdr(1200, 50)];
         let start = 100;
 
         let sut = LayoutStrategy::SpecifiedStart(start);
@@ -303,7 +311,10 @@ mod test {
 
     #[test]
     fn from_input_layout_gives_phdr_and_load_segments() {
-        let phdr = vec![make_paddr_phdr(100, 100, 5200), make_paddr_phdr(1200, 50, 5500)];
+        let phdr = vec![
+            make_paddr_phdr(100, 100, 5200),
+            make_paddr_phdr(1200, 50, 5500),
+        ];
 
         let sut = LayoutStrategy::FromInput;
         let out = sut.layout(phdr.iter(), new_ctx());
@@ -317,7 +328,10 @@ mod test {
 
     #[test]
     fn from_input_layout_gives_full_filesz_segments() {
-        let phdr = vec![make_paddr_phdr(100, 100, 5200), make_paddr_phdr(1200, 50, 5500)];
+        let phdr = vec![
+            make_paddr_phdr(100, 100, 5200),
+            make_paddr_phdr(1200, 50, 5500),
+        ];
 
         let sut = LayoutStrategy::FromInput;
         let out = sut.layout(phdr.iter(), new_ctx());
@@ -329,24 +343,30 @@ mod test {
 
     #[test]
     fn from_input_layout_gives_sorted_segments() {
-        let phdr = vec![make_paddr_phdr(100, 100, 5200), make_paddr_phdr(1200, 50, 5500)];
+        let phdr = vec![
+            make_paddr_phdr(100, 100, 5200),
+            make_paddr_phdr(1200, 50, 5500),
+        ];
 
         let sut = LayoutStrategy::FromInput;
         let out = sut.layout(phdr.iter(), new_ctx());
 
-        for (l,r) in out.iter().tuple_windows() {
+        for (l, r) in out.iter().tuple_windows() {
             assert!(l.p_type != program_header::PT_LOAD || l.p_vaddr <= r.p_vaddr);
         }
     }
 
     #[test]
     fn from_input_layout_gives_plenum() {
-        let phdr = vec![make_paddr_phdr(100, 100, 5200), make_paddr_phdr(1200, 50, 5500)];
+        let phdr = vec![
+            make_paddr_phdr(100, 100, 5200),
+            make_paddr_phdr(1200, 50, 5500),
+        ];
 
         let sut = LayoutStrategy::FromInput;
         let out = sut.layout(phdr.iter(), new_ctx());
 
-        for (l,r) in out.iter().tuple_windows() {
+        for (l, r) in out.iter().tuple_windows() {
             if l.p_type == program_header::PT_PHDR {
                 // The PT_PHDR is within the first PT_LOAD segment.
                 assert!(l.p_paddr >= r.p_paddr);
@@ -364,7 +384,10 @@ mod test {
     fn from_input_layout_gives_paddr_from_input() {
         let paddr1 = 5200;
         let paddr2 = 5500;
-        let phdr = vec![make_paddr_phdr(100, 100, paddr1), make_paddr_phdr(1200, 50, paddr2)];
+        let phdr = vec![
+            make_paddr_phdr(100, 100, paddr1),
+            make_paddr_phdr(1200, 50, paddr2),
+        ];
 
         let sut = LayoutStrategy::FromInput;
         let out = sut.layout(phdr.iter(), new_ctx());
@@ -383,8 +406,8 @@ mod test {
         ProgramHeader {
             p_memsz: memsz,
             p_align: PAGE_SIZE as u64,
-            p_vaddr: rel_offset + 4*PAGE_SIZE as u64,
-            p_offset: rel_offset + 1*PAGE_SIZE as u64,
+            p_vaddr: rel_offset + 4 * PAGE_SIZE as u64,
+            p_offset: rel_offset + 1 * PAGE_SIZE as u64,
             ..ProgramHeader::new()
         }
     }

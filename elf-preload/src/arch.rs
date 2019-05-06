@@ -6,15 +6,15 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms
 
-use std::fmt;
+use crate::Error;
 use goblin::container::Ctx;
 use goblin::elf::header;
-use crate::Error;
+use std::fmt;
 
 /// The architecture for an ELF file.
 ///
-/// The architecture is a combination of the endianness, the bit-size (64 vs. 
-/// 32 bit), and the machine of the ELF file. This information is all drawn from 
+/// The architecture is a combination of the endianness, the bit-size (64 vs.
+/// 32 bit), and the machine of the ELF file. This information is all drawn from
 /// the ELF header in the file.
 #[derive(Debug, Clone, PartialEq, Copy)]
 pub struct Arch {
@@ -23,7 +23,7 @@ pub struct Arch {
 }
 
 impl Arch {
-    pub (crate) fn new(header: &header::Header) -> Result<Self, Error> {
+    pub(crate) fn new(header: &header::Header) -> Result<Self, Error> {
         let container = header.container()?;
         let endian = header.endianness()?;
 
@@ -33,15 +33,23 @@ impl Arch {
         })
     }
 
-    pub (crate) fn ctx(&self) -> Ctx {
+    pub(crate) fn ctx(&self) -> Ctx {
         self.ctx
     }
 }
 
 impl fmt::Display for Arch {
     fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
-        let size = if self.ctx.is_big() {"64 bit"} else {"32 bit"};
-        let endian = if self.ctx.is_little_endian() {"little endian"} else {"big endian"};
+        let size = if self.ctx.is_big() {
+            "64 bit"
+        } else {
+            "32 bit"
+        };
+        let endian = if self.ctx.is_little_endian() {
+            "little endian"
+        } else {
+            "big endian"
+        };
         let machine = header::machine_to_str(self.machine);
 
         write!(f, "{}, {}, {}", size, endian, machine)
@@ -49,15 +57,15 @@ impl fmt::Display for Arch {
 }
 
 #[cfg(test)]
-pub (crate) mod test {
+pub(crate) mod test {
     use super::*;
     use goblin::container::{Container, Endian};
     use goblin::elf::header::EM_ARM;
 
-    pub (crate) fn create_arch(c: Container, e: Endian) -> Arch {
+    pub(crate) fn create_arch(c: Container, e: Endian) -> Arch {
         Arch {
             machine: EM_ARM,
-            ctx: Ctx::new(c,e),
+            ctx: Ctx::new(c, e),
         }
     }
 }

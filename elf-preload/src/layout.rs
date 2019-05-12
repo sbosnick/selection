@@ -6,7 +6,7 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms
 
-use crate::{Arch, OutputWriter, Result};
+use crate::{Arch, Error, OutputWriter, Result};
 use goblin::elf::{program_header, ProgramHeader};
 
 mod strategy;
@@ -38,6 +38,18 @@ impl<'a> Layout<'a> {
         }
     }
 
+    pub(crate) fn out_segments(&self) -> usize {
+        self.out_phdr.len() - 1
+    }
+
+    pub(crate) fn segment_size(&self, _segment: usize) -> usize {
+        unimplemented!()
+    }
+
+    pub(crate) fn write_segment<'b>(&self, _segment: usize, _output: &'b mut[u8]) {
+        unimplemented!()
+    }
+
     /// The required size of the output represented by this layout.
     pub fn required_size(&self) -> usize {
         self.out_phdr
@@ -49,8 +61,12 @@ impl<'a> Layout<'a> {
 
     /// Prepare to write to the given output bytes, which must be at least
     /// [`required_size`][Layout::required_size] in length.
-    pub fn output<'b>(&'a self, _output: &'b mut [u8]) -> Result<OutputWriter<'a, 'b>> {
-        unimplemented!()
+    pub fn output<'b>(&'a self, output: &'b mut [u8]) -> Result<OutputWriter<'a, 'b>> {
+        if output.len() < self.required_size() {
+            Err(Error::OutputTooSmall)
+        } else {
+            Ok(OutputWriter::new(self, output))
+        }
     }
 }
 

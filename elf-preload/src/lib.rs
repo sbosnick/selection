@@ -1,5 +1,4 @@
 // Copyright 2019 Steven Bosnick
-//
 // Licensed under the Apache License, Version 2.0 <LICENSE-APACHE-2.0 or
 // http://www.apache.org/licenses/LICENSE-2.0> or the MIT license
 // <LICENSE-MIT or http://opensource.org/licenses/MIT>, at your
@@ -39,40 +38,12 @@ mod arch;
 mod error;
 mod input;
 mod layout;
+mod output;
 
 pub use arch::Arch;
 pub use error::{BadElfError, Error, Result};
 pub use input::Input;
 pub use layout::{Layout, LayoutStrategy};
+pub use output::OutputWriter;
 
 const PAGE_SIZE: usize = 4096;
-
-use std::marker::PhantomData;
-
-/// A potentially parallelizable writer for the output file. Created by the
-/// [`output`][Layout::output] method.
-pub struct OutputWriter<'a, 'b> {
-    _phantoma: PhantomData<&'a u8>,
-    _phantomb: PhantomData<&'b u8>,
-}
-
-impl<'a, 'b> OutputWriter<'a, 'b> {
-    /// Potentially split this `OutputWriter` into two independent `OutputWriter`'s
-    /// for separate parts of the output.
-    ///
-    /// The signature of this function is intended to make it usable as the
-    /// `splitter` argument to the [rayon][rayon] [split] function.
-    ///
-    /// [rayon]: https://crates.io/crates/rayon
-    /// [split]: https://docs.rs/rayon/1.0.3/rayon/iter/fn.split.html
-    pub fn split(self) -> (Self, Option<Self>) {
-        unimplemented!()
-    }
-
-    /// Write the portion of the output represented by this `OutputWriter` to the
-    /// corresponding sub-slice of the output bytes passed to the
-    /// [`output`][Layout::output] method.
-    pub fn write(&self) -> Result<()> {
-        unimplemented!()
-    }
-}

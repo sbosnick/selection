@@ -24,6 +24,10 @@ pub enum Error {
         message
     )]
     InvalidElf { message: String },
+
+    /// The output bytes are too small for the layout of the output ELF file.
+    #[fail(display = "The output bytes are too small for the layout of the output ELF file.")]
+    OutputTooSmall,
 }
 
 #[doc(hidden)]

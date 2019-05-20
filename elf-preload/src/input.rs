@@ -19,6 +19,7 @@ use itertools::Itertools;
 pub struct Input<'a> {
     arch: Arch,
     phdr: Vec<ProgramHeader>,
+    entry: u64,
     input: &'a [u8],
 }
 
@@ -32,12 +33,14 @@ impl<'a> Input<'a> {
     pub fn new(input: &'a [u8]) -> Result<Self> {
         let elf = Elf::parse(input)?;
         let arch = Arch::new(&elf.header)?;
+        let entry = elf.header.e_entry;
         verify(&elf)?;
 
         Ok(Input {
             arch,
-            phdr: sort_loadable_headers(elf.program_headers).collect(),
             input,
+            entry,
+            phdr: sort_loadable_headers(elf.program_headers).collect(),
         })
     }
 
@@ -54,7 +57,7 @@ impl<'a> Input<'a> {
             verify_first_segment_not_near_zero(self.phdr.iter())?;
         }
 
-        Ok(Layout::new(self.arch, self.phdr.iter(), self.input, start))
+        Ok(Layout::new(self.arch, self.phdr.iter(), self.input, self.entry, start))
     }
 }
 

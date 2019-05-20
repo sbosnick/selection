@@ -27,6 +27,23 @@ pub enum LayoutStrategy {
 }
 
 impl LayoutStrategy {
+    /// Count of the loadable segments in out_phdr.
+    ///
+    /// out_phdr should be the return value of [LayoutStrategy::layout].
+    pub(super) fn out_segments(out_phdr: &[ProgramHeader]) -> usize {
+        out_phdr.len() - 1 // ignore the initial PT_PHDR
+    }
+
+    /// Return the index into an out_phdr for a given loadable segment
+    pub(super) fn out_index(segment: usize) -> usize {
+        segment + 1 // ignore the initial PT_PHDR
+    }
+
+    /// Return the index into an in_phdr corresponding to a given output loadable segment
+    pub(super) fn in_index(segment: usize) -> usize {
+        segment - 1 // there is no PT_LOAD for the headers in the input
+    }
+
     /// Tranforms the input program headers into the output program hearders
     /// in accorance with the given LayoutStrategy.
     ///

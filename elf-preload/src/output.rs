@@ -46,7 +46,7 @@ impl<'a, 'b> OutputWriter<'a, 'b> {
 
 trait SegmentWriter {
     fn segment_size(&self, segment: usize) -> usize;
-    fn write_segment<'b>(&self, segment: usize, output: &'b mut [u8]);
+    fn write_segment<'b>(&self, segment: usize, output: &'b mut [u8]) -> Result<()>;
 }
 
 impl<'a> SegmentWriter for Layout<'a> {
@@ -54,7 +54,7 @@ impl<'a> SegmentWriter for Layout<'a> {
         self.segment_size(segment)
     }
 
-    fn write_segment<'b>(&self, segment: usize, output: &'b mut [u8]) {
+    fn write_segment<'b>(&self, segment: usize, output: &'b mut [u8]) -> Result<()> {
         self.write_segment(segment, output)
     }
 }
@@ -97,7 +97,7 @@ impl<'a, 'b, S: SegmentWriter> ElfWriter<'a, 'b, S> {
 
         for segment in self.segments.clone() {
             let size = self.writer.segment_size(segment);
-            self.writer.write_segment(segment, &mut self.output[offset..offset+size]);
+            self.writer.write_segment(segment, &mut self.output[offset..offset+size])?;
 
             offset += size;
         }
@@ -135,9 +135,10 @@ mod test {
             self.segment_sizes[segment]
         }
 
-        fn write_segment<'b>(&self, segment: usize, output: &'b mut [u8]) {
+        fn write_segment<'b>(&self, segment: usize, output: &'b mut [u8]) -> Result<()> {
             self.segments_writen.borrow_mut().push(segment);
             self.output_sizes.borrow_mut().push(output.len());
+            Ok(())
         }
     }
 

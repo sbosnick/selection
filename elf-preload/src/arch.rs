@@ -36,6 +36,7 @@ impl Arch {
     pub(crate) fn ctx(&self) -> Ctx {
         self.ctx
     }
+
 }
 
 impl fmt::Display for Arch {
@@ -53,6 +54,14 @@ impl fmt::Display for Arch {
         let machine = header::machine_to_str(self.machine);
 
         write!(f, "{}, {}, {}", size, endian, machine)
+    }
+}
+
+impl From<Arch> for header::Header {
+    fn from(arch: Arch) -> Self {
+        let mut header = Self::new(arch.ctx);
+        header.e_machine = arch.machine;
+        header
     }
 }
 

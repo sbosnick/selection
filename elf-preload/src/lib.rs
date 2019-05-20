@@ -29,7 +29,8 @@
 // an inherently serialized Layout in the middle is from Ian Lance Taylor's 20
 // part blog post on linkers, and specifically from https://www.airs.com/blog/archives/47
 
-#[deny(missing_docs, unsafe_code)]
+#![deny(missing_docs, unsafe_code)]
+
 #[cfg(test)]
 #[macro_use]
 extern crate assert_matches;

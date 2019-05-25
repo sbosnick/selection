@@ -5,6 +5,8 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms
 
+// #SPC-elfpreload
+
 //! Library to convert ELF files into a form that is suitable for loading with
 //! [`std::ptr::copy_nonoverlapping`].
 //!

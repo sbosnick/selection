@@ -15,6 +15,8 @@ addons:
             - libc6-dev-armel-cross
             - gcc-aarch64-linux-gnu
             - libc6-dev-arm64-cross
+            # testing tools for elf-preload
+            - elfutils
 
 rust:
     - nightly

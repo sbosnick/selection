@@ -193,8 +193,8 @@ The "elf-preload" crate shall have at least the following tests:
 
 - [[.elflint]]: the output of "elf-preload" shall pass a run of eu-elflint from
     the [elfutils] project;
-- [[.idempotent]]: running 'objcopy -O binary ..." on the output of "elf-preload"
-    shall produce the identical file;
+- [[.idempotent]]: the program headers in the ouput of "elf-preload" shall account
+    for every byte of the output
 - [[.nosections]]: the output of "elf-preload" shall not contain section headers;
 - [[.segments]]: the output of "elf-preload" shall contain a PT_PHDR segment, 
     PT_LOAD segments, and nothing else;

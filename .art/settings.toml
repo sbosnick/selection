@@ -9,6 +9,7 @@ exclude_artifact_paths = []
 # Paths containing code that has artifact links
 code_paths = [
     "elf-preload/tests/elflint.rs",
+    "elf-preload/tests/generaltst.rs",
     "elf-preload/src/lib.rs",
     "elf-preload/src/layout.rs",
     "elf-preload/src/layout/strategy.rs",

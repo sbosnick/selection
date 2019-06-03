@@ -6,10 +6,33 @@
 // except according to those terms
 
 use elf_preload::{Input, LayoutStrategy};
-use goblin::elf::Elf;
+use goblin::elf::{Elf, program_header};
 
 static SMOKETEST_ELF: &'static [u8] = include_bytes!("../test_data/smoketest");
 static KERNEL_ELF: &'static [u8] = include_bytes!("../test_data/kernel.elf");
+
+#[test]
+fn elf_preload_has_expected_segments_for_specified_start() {
+    expected_segments_test(SMOKETEST_ELF, LayoutStrategy::SpecifiedStart(5000));
+}
+
+#[test]
+fn elf_preload_has_expected_segment_for_from_input() {
+    expected_segments_test(KERNEL_ELF, LayoutStrategy::FromInput);
+}
+
+// Implements #TST-elfpreload.segments
+fn expected_segments_test(input: &[u8], strategy: LayoutStrategy) {
+    let output = run_preload(input, strategy);
+
+    let elf = Elf::parse(&output).expect("Output file invalid");
+
+    assert!(elf.program_headers.len() >= 2);
+    assert_eq!(elf.program_headers[0].p_type, program_header::PT_PHDR);
+    for phdr in (&elf.program_headers).iter().skip(1) {
+        assert_eq!(phdr.p_type, program_header::PT_LOAD);
+    }
+}
 
 #[test]
 fn elf_preload_has_no_sections_for_specified_start() {

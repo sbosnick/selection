@@ -5,11 +5,37 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms
 
+// The tests in this file and the other integratin tests implement #TST-elfpreload.
+
 use elf_preload::{Input, LayoutStrategy};
 use goblin::elf::{Elf, program_header};
 
 static SMOKETEST_ELF: &'static [u8] = include_bytes!("../test_data/smoketest");
 static KERNEL_ELF: &'static [u8] = include_bytes!("../test_data/kernel.elf");
+
+#[test]
+fn elf_preload_is_idempotent_for_specificed_start() {
+    idempotent_test(SMOKETEST_ELF, LayoutStrategy::SpecifiedStart(5000));
+}
+
+#[test]
+fn elf_preload_is_idempotent_for_from_input() {
+    idempotent_test(KERNEL_ELF, LayoutStrategy::FromInput);
+}
+
+// Implements #TST-elfpreload.idempotent
+fn idempotent_test(input: &[u8], strategy: LayoutStrategy) {
+    let output = run_preload(input, strategy);
+
+    let elf = Elf::parse(&output).expect("Output file invalid");
+
+    let mut offset = 0;
+    for phdr in (&elf.program_headers).iter().filter(|p| p.p_type == program_header::PT_LOAD) {
+        assert_eq!(phdr.p_offset, offset);
+        offset += phdr.p_filesz;
+    }
+    assert_eq!(output.len(), offset as usize);
+}
 
 #[test]
 fn elf_preload_has_expected_segments_for_specified_start() {

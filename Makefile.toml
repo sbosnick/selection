@@ -1,0 +1,13 @@
+[env]
+RUST_TARGET_PATH = {script = ["git rev-parse --show-toplevel"]}
+
+[tasks.xbuild]
+description = "Runs the cargo xbuild command for a particular target"
+category = "build"
+command = "cargo"
+args = ["xbuild", "--target", "${XBUILD_TARGET}"]
+condition = { env_set = ["XBUILD_TARGET"] }
+dependendcies = ["install-rust-src"]
+
+[tasks.build]
+condition = { env_not_set = ["XBUILD_TARGET"] }

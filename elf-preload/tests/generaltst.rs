@@ -8,7 +8,7 @@
 // The tests in this file and the other integratin tests implement #TST-elfpreload.
 
 use elf_preload::{Input, LayoutStrategy};
-use goblin::elf::{Elf, program_header};
+use goblin::elf::{program_header, Elf};
 
 static SMOKETEST_ELF: &'static [u8] = include_bytes!("../test_data/smoketest");
 static KERNEL_ELF: &'static [u8] = include_bytes!("../test_data/kernel.elf");
@@ -30,7 +30,10 @@ fn idempotent_test(input: &[u8], strategy: LayoutStrategy) {
     let elf = Elf::parse(&output).expect("Output file invalid");
 
     let mut offset = 0;
-    for phdr in (&elf.program_headers).iter().filter(|p| p.p_type == program_header::PT_LOAD) {
+    for phdr in (&elf.program_headers)
+        .iter()
+        .filter(|p| p.p_type == program_header::PT_LOAD)
+    {
         assert_eq!(phdr.p_offset, offset);
         offset += phdr.p_filesz;
     }
@@ -81,11 +84,11 @@ fn no_sections_test(input: &[u8], strategy: LayoutStrategy) {
 
 fn run_preload(input: &[u8], strategy: LayoutStrategy) -> Vec<u8> {
     let input = Input::new(input).expect("Unable to read input file");
-    let layout = input.layout(strategy)
+    let layout = input
+        .layout(strategy)
         .expect("Unable to layout output file");
     let mut output = vec![0xd0; layout.required_size()];
-    let mut writer = layout.output(&mut output)
-        .expect("Unable to create writer");
+    let mut writer = layout.output(&mut output).expect("Unable to create writer");
     writer.write().expect("Unable to write output file");
 
     output

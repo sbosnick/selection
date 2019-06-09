@@ -57,7 +57,13 @@ impl<'a> Input<'a> {
             verify_first_segment_not_near_zero(self.phdr.iter())?;
         }
 
-        Ok(Layout::new(self.arch, self.phdr.iter(), self.input, self.entry, start))
+        Ok(Layout::new(
+            self.arch,
+            self.phdr.iter(),
+            self.input,
+            self.entry,
+            start,
+        ))
     }
 }
 

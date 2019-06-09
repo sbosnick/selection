@@ -6,21 +6,20 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms
 
-use std::ops::Range;
 use crate::{Layout, Result};
+use std::ops::Range;
 
 /// A potentially parallelizable writer for the output file. Created by the
 /// [`output`][Layout::output] method.
-pub struct OutputWriter<'a, 'b> (ElfWriter<'a, 'b, Layout<'a>>);
+pub struct OutputWriter<'a, 'b>(ElfWriter<'a, 'b, Layout<'a>>);
 
 impl<'a, 'b> OutputWriter<'a, 'b> {
-    pub (crate) fn new(layout: &'a Layout<'a>, output: &'b mut [u8]) -> OutputWriter<'a, 'b> {
+    pub(crate) fn new(layout: &'a Layout<'a>, output: &'b mut [u8]) -> OutputWriter<'a, 'b> {
         OutputWriter(ElfWriter {
             output,
             segments: 0..layout.out_segments(),
             writer: layout,
         })
-        
     }
 
     /// Potentially split this `OutputWriter` into two independent `OutputWriter`'s
@@ -32,7 +31,7 @@ impl<'a, 'b> OutputWriter<'a, 'b> {
     /// [rayon]: https://crates.io/crates/rayon
     /// [split]: https://docs.rs/rayon/1.0.3/rayon/iter/fn.split.html
     pub fn split(self) -> (Self, Option<Self>) {
-        let (l,r) = self.0.split();
+        let (l, r) = self.0.split();
         (OutputWriter(l), r.map(|ew| OutputWriter(ew)))
     }
 
@@ -87,7 +86,7 @@ impl<'a, 'b, S: SegmentWriter> ElfWriter<'a, 'b, S> {
                     segments: mid..self.segments.end,
                     writer: self.writer,
                     output: rout,
-                })
+                }),
             )
         }
     }
@@ -97,11 +96,12 @@ impl<'a, 'b, S: SegmentWriter> ElfWriter<'a, 'b, S> {
 
         for segment in self.segments.clone() {
             let size = self.writer.segment_size(segment);
-            self.writer.write_segment(segment, &mut self.output[offset..offset+size])?;
+            self.writer
+                .write_segment(segment, &mut self.output[offset..offset + size])?;
 
             offset += size;
         }
-        
+
         Ok(())
     }
 }
@@ -144,13 +144,13 @@ mod test {
 
     #[test]
     fn elf_writer_write_queries_segment_size() {
-        let fw = FakeWriter::new(vec![3000,4000]);
+        let fw = FakeWriter::new(vec![3000, 4000]);
         let mut output = vec![0; 10000];
 
-        let mut sut = ElfWriter{
+        let mut sut = ElfWriter {
             segments: 0..2,
             writer: &fw,
-            output: &mut output
+            output: &mut output,
         };
         sut.write().unwrap();
 
@@ -160,13 +160,13 @@ mod test {
 
     #[test]
     fn elf_writer_write_writes_expected_segments() {
-        let fw = FakeWriter::new(vec![3000,4000]);
+        let fw = FakeWriter::new(vec![3000, 4000]);
         let mut output = vec![0; 10000];
 
-        let mut sut = ElfWriter{
+        let mut sut = ElfWriter {
             segments: 0..2,
             writer: &fw,
-            output: &mut output
+            output: &mut output,
         };
         sut.write().unwrap();
 
@@ -178,13 +178,13 @@ mod test {
     fn elf_writer_write_writes_with_expected_size_output() {
         let size1 = 3000;
         let size2 = 4000;
-        let fw = FakeWriter::new(vec![size1,size2]);
+        let fw = FakeWriter::new(vec![size1, size2]);
         let mut output = vec![0; 10000];
 
-        let mut sut = ElfWriter{
+        let mut sut = ElfWriter {
             segments: 0..2,
             writer: &fw,
-            output: &mut output
+            output: &mut output,
         };
         sut.write().unwrap();
 
@@ -197,12 +197,12 @@ mod test {
         let fw = FakeWriter::new(vec![3000]);
         let mut output = vec![0; 10000];
 
-        let sut = ElfWriter{
+        let sut = ElfWriter {
             segments: 0..1,
             writer: &fw,
-            output: &mut output
+            output: &mut output,
         };
-        let (l,r) = sut.split();
+        let (l, r) = sut.split();
 
         assert!(r.is_none());
         assert_eq!(l.segments, 0..1);
@@ -211,13 +211,13 @@ mod test {
 
     #[test]
     fn elf_writer_split_queries_segment_sizes() {
-        let fw = FakeWriter::new(vec![3000,4000, 1000, 500]);
+        let fw = FakeWriter::new(vec![3000, 4000, 1000, 500]);
         let mut output = vec![0; 10000];
 
-        let sut = ElfWriter{
+        let sut = ElfWriter {
             segments: 0..4,
             writer: &fw,
-            output: &mut output
+            output: &mut output,
         };
         let _ = sut.split();
 
@@ -227,15 +227,15 @@ mod test {
 
     #[test]
     fn elf_writer_split_splits_segments() {
-        let fw = FakeWriter::new(vec![3000,4000, 1000, 500]);
+        let fw = FakeWriter::new(vec![3000, 4000, 1000, 500]);
         let mut output = vec![0; 10000];
 
-        let sut = ElfWriter{
+        let sut = ElfWriter {
             segments: 0..4,
             writer: &fw,
-            output: &mut output
+            output: &mut output,
         };
-        let (l,r) = sut.split();
+        let (l, r) = sut.split();
         let r = r.expect("r is unexpectly None");
 
         assert_eq!(l.segments, 0..2);
@@ -244,16 +244,16 @@ mod test {
 
     #[test]
     fn elf_writer_split_splits_output() {
-        let fw = FakeWriter::new(vec![3000,4000, 1000, 500]);
+        let fw = FakeWriter::new(vec![3000, 4000, 1000, 500]);
         let mut output = vec![0; 10000];
         let output_ptr = output.as_ptr();
 
-        let sut = ElfWriter{
+        let sut = ElfWriter {
             segments: 0..4,
             writer: &fw,
-            output: &mut output
+            output: &mut output,
         };
-        let (l,r) = sut.split();
+        let (l, r) = sut.split();
         let r = r.expect("r is unexpectly None");
 
         assert_eq!(l.output.as_ptr(), output_ptr);

@@ -23,13 +23,12 @@ fn elf_preload_writes_valid_elf_for_from_input() {
 
 fn smoke_test(input: &[u8], strategy: LayoutStrategy) {
     let input = Input::new(input).expect("Unable to read input file");
-    let layout = input.layout(strategy)
+    let layout = input
+        .layout(strategy)
         .expect("Unable to layout output file");
     let mut output = vec![0xd0; layout.required_size()];
-    let mut writer = layout.output(&mut output)
-        .expect("Unable to create writer");
+    let mut writer = layout.output(&mut output).expect("Unable to create writer");
     writer.write().expect("Unable to write output file");
 
-    Elf::parse(&output)
-        .expect("Output file is an invalid Elf file!");
+    Elf::parse(&output).expect("Output file is an invalid Elf file!");
 }

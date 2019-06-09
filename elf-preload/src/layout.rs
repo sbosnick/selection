@@ -26,11 +26,11 @@ pub struct Layout<'a> {
 
 impl<'a> Layout<'a> {
     pub(crate) fn new<'b, I>(
-        arch: Arch, 
+        arch: Arch,
         phdr: I,
         input: &'a [u8],
         entry: u64,
-        start: LayoutStrategy
+        start: LayoutStrategy,
     ) -> Self
     where
         I: ExactSizeIterator<Item = &'b ProgramHeader>,
@@ -57,7 +57,7 @@ impl<'a> Layout<'a> {
     }
 
     // #SPC-elfpreload.programheader
-    pub(crate) fn write_segment<'b>(&self, segment: usize, output: &'b mut[u8]) -> Result<()> {
+    pub(crate) fn write_segment<'b>(&self, segment: usize, output: &'b mut [u8]) -> Result<()> {
         if segment == 0 {
             let mut phoff = Header::size(&self.arch.ctx());
             let mut header: Header = self.arch.into();
@@ -82,7 +82,6 @@ impl<'a> Layout<'a> {
             for elt in &mut output[bss_out_range] {
                 *elt = 0;
             }
-
         }
 
         Ok(())
@@ -111,12 +110,15 @@ impl<'a> Layout<'a> {
 #[cfg(test)]
 mod test {
     use super::*;
-    use std::ops::Range;
     use crate::arch::test::create_arch;
     use crate::PAGE_SIZE;
     use goblin::container::{Container, Endian};
-    use goblin::elf::{Elf, program_header::{PT_LOAD, PT_PHDR}};
+    use goblin::elf::{
+        program_header::{PT_LOAD, PT_PHDR},
+        Elf,
+    };
     use scroll::Pread;
+    use std::ops::Range;
 
     #[test]
     fn specified_layout_required_size_is_header_and_loadables() {
@@ -160,9 +162,7 @@ mod test {
         let size = 355;
         let in_start = 300;
         let out_start = 501;
-        let in_phdr = vec![
-            make_load_header(in_start..(in_start + size), None),
-        ];
+        let in_phdr = vec![make_load_header(in_start..(in_start + size), None)];
         let out_phdr = vec![
             make_fake_pt_phdr(),
             make_load_header(0..500, None),
@@ -178,7 +178,8 @@ mod test {
             arch: create_arch(Container::Little, Endian::Little),
             entry: 0,
         };
-        sut.write_segment(1, &mut output).expect("write_segement failed unexpectedly");
+        sut.write_segment(1, &mut output)
+            .expect("write_segement failed unexpectedly");
 
         for out_char in &output[0..size] {
             assert_eq!(*out_char, in_char);
@@ -192,9 +193,10 @@ mod test {
         let in_start = 300;
         let out_start = 501;
         let out_size = in_size + 50;
-        let in_phdr = vec![
-            make_load_header(in_start..(in_start + in_size), Some(out_size as u64)),
-        ];
+        let in_phdr = vec![make_load_header(
+            in_start..(in_start + in_size),
+            Some(out_size as u64),
+        )];
         let out_phdr = vec![
             make_fake_pt_phdr(),
             make_load_header(0..500, None),
@@ -210,7 +212,8 @@ mod test {
             arch: create_arch(Container::Little, Endian::Little),
             entry: 0,
         };
-        sut.write_segment(1, &mut output).expect("write_segement failed unexpectedly");
+        sut.write_segment(1, &mut output)
+            .expect("write_segement failed unexpectedly");
 
         for out_char in &output[in_size..out_size] {
             assert_eq!(*out_char, 0);
@@ -221,10 +224,7 @@ mod test {
     fn layout_write_first_segement_writes_elf_header() {
         let arch = create_arch(Container::Little, Endian::Little);
         let size = Header::size(&arch.ctx()) + ProgramHeader::size(&arch.ctx());
-        let out_phdr = vec![
-            make_fake_pt_phdr(),
-            make_load_header(0..size, None),
-        ];
+        let out_phdr = vec![make_fake_pt_phdr(), make_load_header(0..size, None)];
         let mut output = vec![0xc0; 5000];
 
         let sut = Layout {
@@ -234,7 +234,8 @@ mod test {
             input: &[],
             entry: 0,
         };
-        sut.write_segment(0, &mut output).expect("write_segement failed unexpectedly");
+        sut.write_segment(0, &mut output)
+            .expect("write_segement failed unexpectedly");
 
         let header = (&output).pread::<Header>(0).expect("Invalid Elf Header");
         let out_arch = Arch::new(&header).expect("Invalid Arch in Elf Header");
@@ -247,10 +248,7 @@ mod test {
         let arch = create_arch(Container::Little, Endian::Little);
         let entry = 0xd00dfeed;
         let size = Header::size(&arch.ctx()) + ProgramHeader::size(&arch.ctx());
-        let out_phdr = vec![
-            make_fake_pt_phdr(),
-            make_load_header(0..size, None),
-        ];
+        let out_phdr = vec![make_fake_pt_phdr(), make_load_header(0..size, None)];
         let mut output = vec![0xc0; 5000];
 
         let sut = Layout {
@@ -260,7 +258,8 @@ mod test {
             input: &[],
             entry,
         };
-        sut.write_segment(0, &mut output).expect("write_segement failed unexpectedly");
+        sut.write_segment(0, &mut output)
+            .expect("write_segement failed unexpectedly");
 
         let header = (&output).pread::<Header>(0).expect("Invalid Elf Header");
         assert_eq!(header.e_entry, entry);
@@ -270,10 +269,7 @@ mod test {
     fn layout_write_first_segment_writes_phdrs() {
         let arch = create_arch(Container::Little, Endian::Little);
         let size = Header::size(&arch.ctx()) + ProgramHeader::size(&arch.ctx());
-        let out_phdr = vec![
-            make_fake_pt_phdr(),
-            make_load_header(0..size, None),
-        ];
+        let out_phdr = vec![make_fake_pt_phdr(), make_load_header(0..size, None)];
         let mut output = vec![0xc0; 5000];
 
         let sut = Layout {
@@ -283,7 +279,8 @@ mod test {
             input: &[],
             entry: 0,
         };
-        sut.write_segment(0, &mut output).expect("write_segement failed unexpectedly");
+        sut.write_segment(0, &mut output)
+            .expect("write_segement failed unexpectedly");
 
         let elf = Elf::parse(&output).expect("Invalid Elf file");
         assert_eq!(elf.program_headers.len(), 2);

@@ -23,7 +23,7 @@ pub enum Error {
         display = "The input ELF file does not satisfy a required constraint: {}",
         message
     )]
-    InvalidElf { 
+    InvalidElf {
         /// The error message that describes the failed constraint.
         message: String,
     },

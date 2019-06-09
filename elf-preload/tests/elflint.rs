@@ -7,10 +7,10 @@
 
 // Implements #TST-elfpreload.elflint
 
+use elf_preload::{Input, LayoutStrategy};
 use std::fs;
 use std::path::Path;
 use std::process::Command;
-use elf_preload::{Input, LayoutStrategy};
 use tempfile;
 
 static SMOKETEST_ELF: &'static [u8] = include_bytes!("../test_data/smoketest");
@@ -38,11 +38,11 @@ fn elf_lint_test(input: &[u8], strategy: LayoutStrategy) {
 
 fn run_preload(input: &[u8], strategy: LayoutStrategy) -> Vec<u8> {
     let input = Input::new(input).expect("Unable to read input file");
-    let layout = input.layout(strategy)
+    let layout = input
+        .layout(strategy)
         .expect("Unable to layout output file");
     let mut output = vec![0xd0; layout.required_size()];
-    let mut writer = layout.output(&mut output)
-        .expect("Unable to create writer");
+    let mut writer = layout.output(&mut output).expect("Unable to create writer");
     writer.write().expect("Unable to write output file");
 
     output

@@ -36,7 +36,6 @@ impl Arch {
     pub(crate) fn ctx(&self) -> Ctx {
         self.ctx
     }
-
 }
 
 impl fmt::Display for Arch {

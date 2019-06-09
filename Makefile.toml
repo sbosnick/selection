@@ -1,13 +1,63 @@
 [env]
+# Set the location for the targetspec files to the root of the project
 RUST_TARGET_PATH = {script = ["git rev-parse --show-toplevel"]}
+
+# Add development flows for the xbuild targets
+[tasks.dev-aarch64-test-flow]
+env = { "XBUILD_TARGET" = "aarch64-unknown-none-elf" }
+run_task = "dev-test-flow"
+
+[tasks.dev-armv7-test-flow]
+env = { "XBUILD_TARGET" = "armv7-unknown-none-eabi" }
+run_task = "dev-test-flow"
+
+[tasks.dev-x86_64-test-flow]
+env = { "XBUILD_TARGET" = "x86_64-unknown-none-elf" }
+run_task = "dev-test-flow"
+
+# Add the xbuild task and integrate it into the default flows through the hook tasks
+[tasks.post-build]
+run_task = [
+    { name = "xbuild",  condition = { env_false = ["CARGO_MAKE_CI"] } },
+    { name = "xbuild-verbose", condition = { env_true = ["CARGO_MAKE_CI"] } }
+]
 
 [tasks.xbuild]
 description = "Runs the cargo xbuild command for a particular target"
-category = "build"
+category = "Build"
 command = "cargo"
 args = ["xbuild", "--target", "${XBUILD_TARGET}"]
 condition = { env_set = ["XBUILD_TARGET"] }
 dependendcies = ["install-rust-src"]
 
+[tasks.xbuild-verbose]
+description = "Runs the cargo xbuild command for a particular target with verbose output"
+category = "Build"
+command = "cargo"
+args = ["xbuild", "--verbose", "--target", "${XBUILD_TARGET}"]
+condition = { env_set = ["XBUILD_TARGET"] }
+dependendcies = ["install-rust-src"]
+
 [tasks.build]
 condition = { env_not_set = ["XBUILD_TARGET"] }
+
+[tasks.build-verbose]
+condition = { env_not_set = ["XBUILD_TARGET"] }
+
+[tasks-build-release]
+condition = { env_not_set = ["XBUILD_TARGET"] }
+
+[tasks.test]
+condition = { env_not_set = ["XBUILD_TARGET"] }
+
+[tasks.test-verbose]
+condition = { env_not_set = ["XBUILD_TARGET"] }
+
+# Init and end hooks
+[tasks.init]
+command = "echo"
+args = ["Starting in ${CARGO_MAKE_WORKING_DIRECTORY}"]
+
+[tasks.end]
+command = "echo"
+args = ["Ending in ${CARGO_MAKE_WORKING_DIRECTORY}"]

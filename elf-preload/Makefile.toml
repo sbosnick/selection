@@ -1,1 +1,8 @@
 extend = "../Makefile.toml"
+
+# elf-preload is native-only so don't run xbuild
+[tasks.xbuild]
+disabled = true
+
+[tasks.xbuild-verbose]
+disabled = true

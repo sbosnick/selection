@@ -6,3 +6,6 @@ disabled = true
 
 [tasks.xbuild-verbose]
 disabled = true
+
+[tasks.xbuild-verbose-release]
+disabled = true

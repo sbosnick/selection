@@ -19,11 +19,11 @@ run_task = "dev-test-flow"
 [tasks.post-build]
 run_task = [
     { name = "xbuild",  condition = { env_false = ["CARGO_MAKE_CI"] } },
-    { name = "xbuild-verbose", condition = { env_true = ["CARGO_MAKE_CI"] } }
+    { name = "ci-xbuild-flow", condition = { env_true = ["CARGO_MAKE_CI"] } }
 ]
 
 [tasks.xbuild]
-description = "Runs the cargo xbuild command for a particular target"
+description = "Runs cargo xbuild command for a particular target"
 category = "Build"
 command = "cargo"
 args = ["xbuild", "--target", "${XBUILD_TARGET}"]
@@ -31,27 +31,71 @@ condition = { env_set = ["XBUILD_TARGET"] }
 dependendcies = ["install-rust-src"]
 
 [tasks.xbuild-verbose]
-description = "Runs the cargo xbuild command for a particular target with verbose output"
+description = "Runs cargo xbuild command for a particular target with verbose output"
 category = "Build"
 command = "cargo"
 args = ["xbuild", "--verbose", "--target", "${XBUILD_TARGET}"]
 condition = { env_set = ["XBUILD_TARGET"] }
 dependendcies = ["install-rust-src"]
 
+[tasks.xbuild-verbose-release]
+description = "Runs cargo xbuild command for a particular target for release and with verbose output"
+category = "Build"
+command = "cargo"
+args = ["xbuild", "--verbose", "--release", "--target", "${XBUILD_TARGET}"]
+condition = { env_set = ["XBUILD_TARGET"] }
+dependendcies = ["install-rust-src"]
+
+[tasks.xbuild-verified-class]
+description = "Runs cargo xbuild command for a particular target with the verified-class feature"
+category = "Build"
+command = "cargo"
+args = ["xbuild", "--verbose", "--feature", "verified-class", "--target", "${XBUILD_TARGET}"]
+condition = { env_set = ["XBUILD_TARGET"] }
+dependendcies = ["install-rust-src"]
+
+[tasks.ci-xbuild-flow]
+description = "Runs the pre/post hooks and the required xbuild tasks for CI"
+category = "CI"
+dependendcies = [
+    "pre-xbuild",
+    "xbuild-verbose",
+    "xbuild-verbose-release",
+    "post-xbuild"
+]
+
+[tasks.pre-xbuild]
+category = "Build"
+
+[tasks.post-xbuild]
+category = "Build"
+
 [tasks.build]
 condition = { env_not_set = ["XBUILD_TARGET"] }
+args = ["build"]
 
 [tasks.build-verbose]
 condition = { env_not_set = ["XBUILD_TARGET"] }
+args = ["build", "--verbose"]
 
 [tasks-build-release]
 condition = { env_not_set = ["XBUILD_TARGET"] }
+args = ["build", "--release"]
 
 [tasks.test]
 condition = { env_not_set = ["XBUILD_TARGET"] }
+args = ["test"]
 
 [tasks.test-verbose]
 condition = { env_not_set = ["XBUILD_TARGET"] }
+args = ["test", "--verbose"]
+
+# Install seL4 build dependendcies and hook into CI flow
+[tasks.pre-ci-flow]
+run_task = "install-sel4-deps"
+
+[tasks.install-sel4-deps]
+install_script = ["pip install --user sel4-deps"]
 
 # Init and end hooks
 [tasks.init]

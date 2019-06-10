@@ -1,1 +1,4 @@
 extend = "../Makefile.toml"
+
+[tasks.post-xbuild]
+run_task = "xbuild-verified-class"

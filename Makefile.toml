@@ -4,14 +4,20 @@ RUST_TARGET_PATH = {script = ["git rev-parse --show-toplevel"]}
 
 # Add development flows for the xbuild targets
 [tasks.dev-aarch64-test-flow]
+description = "Development testing flow for aarch64"
+category = "Development"
 env = { "XBUILD_TARGET" = "aarch64-unknown-none-elf" }
 run_task = "dev-test-flow"
 
 [tasks.dev-armv7-test-flow]
+description = "Development testing flow for armv7"
+category = "Development"
 env = { "XBUILD_TARGET" = "armv7-unknown-none-eabi" }
 run_task = "dev-test-flow"
 
 [tasks.dev-x86_64-test-flow]
+description = "Development testing flow for x86_64"
+category = "Development"
 env = { "XBUILD_TARGET" = "x86_64-unknown-none-elf" }
 run_task = "dev-test-flow"
 

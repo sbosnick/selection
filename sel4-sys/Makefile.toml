@@ -7,6 +7,6 @@ run_task = "xbuild-smoketest"
 description = "Runs cargo xbuild to build the smoketest example"
 category = "Build"
 command = "cargo"
-args = ["xbuild", "--verbose", "--example", "smoketest", --target", "${XBUILD_TARGET}"]
+args = ["xbuild", "--verbose", "--example", "smoketest", "--target", "${XBUILD_TARGET}"]
 condition = { env_set = ["XBUILD_TARGET"] }
 dependendcies = ["install-rust-src"]

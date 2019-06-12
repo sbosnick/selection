@@ -21,6 +21,25 @@ category = "Development"
 env = { "XBUILD_TARGET" = "x86_64-unknown-none-elf" }
 run_task = "dev-test-flow"
 
+# Add CI flows for the xbuild targets
+[tasks.ci-aarch64-flow]
+description = "CI flow for aarch64"
+category = "CI"
+env = { "XBUILD_TARGET" = "aarch64-unknown-none-elf" }
+run_task = "ci-flow"
+
+[tasks.ci-armv7-flow]
+description = "CI flow for armv7"
+category = "CI"
+env = { "XBUILD_TARGET" = "armv7-unknown-none-elf" }
+run_task = "ci-flow"
+
+[tasks.ci-x86_64-flow]
+description = "CI flow for x86_64"
+category = "CI"
+env = { "XBUILD_TARGET" = "x86_64-unknown-none-elf" }
+run_task = "ci-flow"
+
 # Add the xbuild task and integrate it into the default flows through the hook tasks
 [tasks.post-build]
 run_task = [

@@ -31,7 +31,7 @@ run_task = "ci-flow"
 [tasks.ci-armv7-flow]
 description = "CI flow for armv7"
 category = "CI"
-env = { "XBUILD_TARGET" = "armv7-unknown-none-elf" }
+env = { "XBUILD_TARGET" = "armv7-unknown-none-eabi" }
 run_task = "ci-flow"
 
 [tasks.ci-x86_64-flow]

@@ -53,7 +53,7 @@ category = "Build"
 command = "cargo"
 args = ["xbuild", "--target", "${XBUILD_TARGET}"]
 condition = { env_set = ["XBUILD_TARGET"] }
-dependendcies = ["install-rust-src"]
+dependencies = ["install-rust-src"]
 
 [tasks.xbuild-verbose]
 description = "Runs cargo xbuild command for a particular target with verbose output"
@@ -61,7 +61,7 @@ category = "Build"
 command = "cargo"
 args = ["xbuild", "--verbose", "--target", "${XBUILD_TARGET}"]
 condition = { env_set = ["XBUILD_TARGET"] }
-dependendcies = ["install-rust-src"]
+dependencies = ["install-rust-src"]
 
 [tasks.xbuild-verbose-release]
 description = "Runs cargo xbuild command for a particular target for release and with verbose output"
@@ -69,7 +69,7 @@ category = "Build"
 command = "cargo"
 args = ["xbuild", "--verbose", "--release", "--target", "${XBUILD_TARGET}"]
 condition = { env_set = ["XBUILD_TARGET"] }
-dependendcies = ["install-rust-src"]
+dependencies = ["install-rust-src"]
 
 [tasks.xbuild-verified-class]
 description = "Runs cargo xbuild command for a particular target with the verified-class feature"
@@ -77,12 +77,12 @@ category = "Build"
 command = "cargo"
 args = ["xbuild", "--verbose", "--feature", "verified-class", "--target", "${XBUILD_TARGET}"]
 condition = { env_set = ["XBUILD_TARGET"] }
-dependendcies = ["install-rust-src"]
+dependencies = ["install-rust-src"]
 
 [tasks.ci-xbuild-flow]
 description = "Runs the pre/post hooks and the required xbuild tasks for CI"
 category = "CI"
-dependendcies = [
+dependencies = [
     "pre-xbuild",
     "xbuild-verbose",
     "xbuild-verbose-release",
@@ -115,7 +115,7 @@ args = ["test"]
 condition = { env_not_set = ["XBUILD_TARGET"] }
 args = ["test", "--verbose"]
 
-# Install seL4 build dependendcies and hook into CI flow
+# Install seL4 build dependencies and hook into CI flow
 [tasks.pre-ci-flow]
 run_task = "install-sel4-deps"
 

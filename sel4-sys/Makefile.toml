@@ -9,4 +9,4 @@ category = "Build"
 command = "cargo"
 args = ["xbuild", "--verbose", "--example", "smoketest", "--target", "${XBUILD_TARGET}"]
 condition = { env_set = ["XBUILD_TARGET"] }
-dependendcies = ["install-rust-src"]
+dependencies = ["install-rust-src"]

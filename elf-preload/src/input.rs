@@ -379,7 +379,7 @@ mod test {
     }
 
     fn get_ctx() -> Ctx {
-        use goblin::container::{Container, Ctx, Endian};
+        use goblin::container::{Container, Endian};
 
         Ctx::new(Container::Little, Endian::Little)
     }

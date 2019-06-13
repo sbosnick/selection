@@ -75,7 +75,7 @@ dependencies = ["install-rust-src"]
 description = "Runs cargo xbuild command for a particular target with the verified-class feature"
 category = "Build"
 command = "cargo"
-args = ["xbuild", "--verbose", "--feature", "verified-class", "--target", "${XBUILD_TARGET}"]
+args = ["xbuild", "--verbose", "--features", "verified-class", "--target", "${XBUILD_TARGET}"]
 condition = { env_set = ["XBUILD_TARGET"] }
 dependencies = ["install-rust-src"]
 

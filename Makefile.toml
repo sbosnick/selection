@@ -18,8 +18,9 @@
 # The toplevel flows are either development or CI flows that set "XBUILD_TARGET"
 # then run the corresponding default development or CI flow.
 #
-# The utility tasks are concenred with installing the seL4 python dependencies and
-# with init/end hooks that bracket parts of the log file.
+# The utility tasks are concenred with installing the seL4 python dependencies,
+# with init/end hooks that bracket parts of the log file, and with exporting the
+# design documentation using "artifact".
 #
 # Developers running on their local machine are most likely interested in the
 # following development flows:
@@ -45,6 +46,10 @@
 [env]
 # Set the location for the targetspec files to the root of the project
 RUST_TARGET_PATH = {script = ["git rev-parse --show-toplevel"]}
+# Set the version of artifact to use
+ARTIFACT_VERSION = "2.1.5"
+# Set the directory to which to export the design documentation
+ART_EXPORT_DIR = "target/design"
 
 
 #####################
@@ -76,23 +81,26 @@ run_task = "dev-test-flow"
 ############
 
 # Add CI flows for the xbuild targets
-[tasks.ci-aarch64-flow]
+[tasks.workspace-ci-aarch64-flow]
 description = "CI flow for aarch64"
 category = "CI"
+workspace = false
 env = { "XBUILD_TARGET" = "aarch64-unknown-none-elf" }
-run_task = "ci-flow"
+run_task = "workspace-ci-flow"
 
-[tasks.ci-armv7-flow]
+[tasks.workspace-ci-armv7-flow]
 description = "CI flow for armv7"
 category = "CI"
+workspace = false
 env = { "XBUILD_TARGET" = "armv7-unknown-none-eabi" }
-run_task = "ci-flow"
+run_task = "workspace-ci-flow"
 
-[tasks.ci-x86_64-flow]
+[tasks.workspace-ci-x86_64-flow]
 description = "CI flow for x86_64"
 category = "CI"
+workspace = false
 env = { "XBUILD_TARGET" = "x86_64-unknown-none-elf" }
-run_task = "ci-flow"
+run_task = "workspace-ci-flow"
 
 
 ###############
@@ -180,11 +188,43 @@ args = ["test", "--verbose"]
 #################
 
 # Install seL4 build dependencies and hook into CI flow
-[tasks.pre-ci-flow]
+[tasks.pre-workspace-ci-flow]
 run_task = "install-sel4-deps"
 
 [tasks.install-sel4-deps]
 install_script = ["pip install --user sel4-deps"]
+
+#######################
+# Documentation Tasks #
+#######################
+
+# Run art export and hook it into the CI flow
+[tasks.post-workspace-ci-flow]
+condition = { env_not_set = ["XBUILD_TARGET"] }
+run_task = "art-export"
+
+[tasks.art-export]
+description = "Runs art export to generate the design documentation."
+category = "Documentation"
+env = { ART_BIN = "${HOME}/.local/bin/art"}
+command = "${ART_BIN}"
+args = ["export", "html", "${ART_EXPORT_DIR}"]
+install_script = [
+'''
+${ART_BIN} --version >/dev/null 2>&1 || {
+    install_prefix = "${HOME}/.local/bin"
+    if [[ ! -d "${install_prefix}" ]]; then
+	mkdir "${install_prefix}"
+    fi
+
+    download_prefix="https://github.com/vitiral/artifact/releases/download"
+    download_suffix="x86_64-unknown-linux-gnu.tar.gz"
+    art_release="${download_prefix}/v${ARTIFACT_VERSION}/artifact-v${ARTIFACT_VERSION}-${download_suffix}"
+
+    wget -qO - "${art_release}" | tar xzv -C "${install_prefix}"
+}
+'''
+]
 
 
 ######################

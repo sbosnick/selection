@@ -1,3 +1,47 @@
+# Copyright 2019 Steven Bosnick
+#
+# Licensed under the Apache License, Version 2.0 <LICENSE-APACHE-2.0 or
+# http://www.apache.org/licenses/LICENSE-2.0> or the MIT license
+# <LICENSE-MIT or http://opensource.org/licenses/MIT>, at your
+# option. This file may not be copied, modified, or distributed
+# except according to those terms
+
+# This file extends the default cargo make Makefile.toml with three kinds of
+# tasks: toplevel flows, build tasks and utility tasks. 
+#
+# The build tasks are concerned with several variations of running "cargo xbuild" 
+# and with not running "cargo build" when "cargo xbuild" is what is called for. 
+# The differentiation between when to use "build" and when to use "xbuild" is
+# done by whether or not the "XBUILD_TARGET" environment variable is set. The
+# "XBUILD_TARGET" is also used as the "--target" parameter for "cargo xbuild".
+#
+# The toplevel flows are either development or CI flows that set "XBUILD_TARGET"
+# then run the corresponding default development or CI flow.
+#
+# The utility tasks are concenred with installing the seL4 python dependencies and
+# with init/end hooks that bracket parts of the log file.
+#
+# Developers running on their local machine are most likely interested in the
+# following development flows:
+# 	- dev-test-flow (from default Makefile.toml file)
+# 	- dev-aarch64-test-flow
+# 	- dev-arm7-test-flow
+# 	- dev-x86_64-test-flow
+#
+# The tasks and flows from this Makefile.toml are extended or modified by the 
+# crate-specific Makefile.toml files in each of the crate directories. Those
+# files may disable the xbuild tasks (i.e. elf-preload/Makefile.toml), or add
+# another task to the CI flows. The sel4-plat-*/Makefile.toml files tie in one
+# of the "xbuild" tasks defined in this file into the CI flow. The
+# sel4-sys/Makefile.toml file, on the other hand, defines its own "xbuild" task
+# and ties that into the CI flow.
+#
+# NOTE: If you are editing one of the Makefile.toml files please be very careful
+# about the spelling of keywords. "cargo make" does not detect misspelled keywords
+# and instead ignores them. This can lead to "carog make" appearing to work when it
+# is really just skipping taks instead of running them which will make for a hard-to-
+# diagnose problem. (This is based on experience.)
+
 [env]
 # Set the location for the targetspec files to the root of the project
 RUST_TARGET_PATH = {script = ["git rev-parse --show-toplevel"]}

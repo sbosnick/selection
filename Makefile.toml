@@ -2,6 +2,11 @@
 # Set the location for the targetspec files to the root of the project
 RUST_TARGET_PATH = {script = ["git rev-parse --show-toplevel"]}
 
+
+#####################
+# Development Flows #
+#####################
+
 # Add development flows for the xbuild targets
 [tasks.dev-aarch64-test-flow]
 description = "Development testing flow for aarch64"
@@ -21,6 +26,11 @@ category = "Development"
 env = { "XBUILD_TARGET" = "x86_64-unknown-none-elf" }
 run_task = "dev-test-flow"
 
+
+############
+# CI Flows #
+############
+
 # Add CI flows for the xbuild targets
 [tasks.ci-aarch64-flow]
 description = "CI flow for aarch64"
@@ -39,6 +49,11 @@ description = "CI flow for x86_64"
 category = "CI"
 env = { "XBUILD_TARGET" = "x86_64-unknown-none-elf" }
 run_task = "ci-flow"
+
+
+###############
+# Build Tasks #
+###############
 
 # Add the xbuild task and integrate it into the default flows through the hook tasks
 [tasks.post-build]
@@ -115,6 +130,11 @@ args = ["test"]
 condition = { env_not_set = ["XBUILD_TARGET"] }
 args = ["test", "--verbose"]
 
+
+#################
+# Install Tasks #
+#################
+
 # Install seL4 build dependencies and hook into CI flow
 [tasks.pre-ci-flow]
 run_task = "install-sel4-deps"
@@ -122,7 +142,11 @@ run_task = "install-sel4-deps"
 [tasks.install-sel4-deps]
 install_script = ["pip install --user sel4-deps"]
 
-# Init and end hooks
+
+######################
+# Init and End Hooks #
+######################
+
 [tasks.init]
 command = "echo"
 args = ["Starting in ${CARGO_MAKE_WORKING_DIRECTORY}"]

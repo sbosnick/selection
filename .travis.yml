@@ -28,16 +28,9 @@ env:
         - CI_TASK=workspace-ci-armv7-flow
         - CI_TASK=workspace-ci-x86_64-flow
 
-before_install:
-    #- export PATH=$PATH:$HOME/.local/bin
-    #- ci/install_artifact 2.1.5 $HOME/.local/bin
-
 script:
     - which cargo-make || cargo install cargo-make
     - cargo make ${CI_TASK}
-
-after_success:
-    #- art export html target/design
 
 deploy:
     provider: pages

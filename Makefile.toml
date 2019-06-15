@@ -189,7 +189,7 @@ args = ["test", "--verbose"]
 
 # Install seL4 build dependencies and hook into CI flow
 [tasks.pre-workspace-ci-flow]
-run_task = "install-sel4-deps"
+dependencies = "install-sel4-deps"
 
 [tasks.install-sel4-deps]
 install_script = ["pip install --user sel4-deps"]
@@ -201,7 +201,7 @@ install_script = ["pip install --user sel4-deps"]
 # Run art export and hook it into the CI flow
 [tasks.post-workspace-ci-flow]
 condition = { env_not_set = ["XBUILD_TARGET"] }
-run_task = "art-export"
+dependencies = "art-export"
 
 [tasks.art-export]
 description = "Runs art export to generate the design documentation."
@@ -212,7 +212,7 @@ args = ["export", "html", "${ART_EXPORT_DIR}"]
 install_script = [
 '''
 ${ART_BIN} --version >/dev/null 2>&1 || {
-    install_prefix = "${HOME}/.local/bin"
+    install_prefix="${HOME}/.local/bin"
     if [[ ! -d "${install_prefix}" ]]; then
 	mkdir "${install_prefix}"
     fi

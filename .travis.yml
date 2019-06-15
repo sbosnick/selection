@@ -22,13 +22,6 @@ rust:
     - nightly
 
 env:
-    #global:
-    #    - RUST_TARGET_PATH=${TRAVIS_BUILD_DIR}
-    #matrix:
-    #    - TARGET=host
-    #    - TARGET=armv7-unknown-none-eabi
-    #    - TARGET=aarch64-unknown-none-elf
-    #    - TARGET=x86_64-unknown-none-elf
     matrix:
         - CI_TASK=ci-flow
         - CI_TASK=ci-aarch64-flow
@@ -37,30 +30,9 @@ env:
 
 before_install:
     - export PATH=$PATH:$HOME/.local/bin
-      #- pip install --user sel4-deps
-      #- rustup component add rust-src
-      #- cargo install cargo-update || true
-      #- cargo install-update -i cargo-xbuild cargo-update
     - ci/install_artifact 2.1.5 $HOME/.local/bin
 
-#install:
-#    - if [ $TARGET == "host" ]; then
-#        cargo build --verbose;
-#      else
-#        cargo xbuild --target ${TARGET} --verbose;
-#      fi
-
 script:
-#    - if [ $TARGET == "host" ]; then
-#        cargo test --verbose;
-#      else
-#        cargo xbuild --target ${TARGET} --verbose --release
-#        && cargo xbuild --target ${TARGET} --verbose --package sel4-sys --example smoketest
-#        && find . -path './sel4-plat-*/Cargo.toml' -exec 
-#                cargo xbuild --target ${TARGET} --verbose --manifest-path {} --features verified-class
-#            \;
-#        ;
-#      fi
     - which cargo-make || cargo install cargo-make
     - cargo make ${CI_TASK}
 

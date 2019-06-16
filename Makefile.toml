@@ -213,7 +213,7 @@ install_script = [
 '''
 ${ART_BIN} --version >/dev/null 2>&1 || {
     install_prefix="${HOME}/.local/bin"
-    if [[ ! -d "${install_prefix}" ]]; then
+    if [ ! -d "${install_prefix}" ]; then
 	mkdir "${install_prefix}"
     fi
 
